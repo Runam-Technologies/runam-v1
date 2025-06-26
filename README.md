@@ -35,5 +35,3 @@ See `docs/` folder for the SRS document and proposals.
 - HTML, CSS, JavaScript
 - (Planned) Node.js, Express
 
-## 👨‍💻 Author
-Emmanuel Ikechi — [@EMMANUEL-IKECHI](https://github.com/EMMANUEL-IKECHI)
