@@ -3,9 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Management</title>
+    <title>Order Management - Runam Technologies</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom Tailwind Colors */
+        :root {
+            --color-runam-green: #2CBA76;
+            --color-runam-yellow: #FFD700;
+            --color-runam-light-grey: #F5F5F5;
+            --color-runam-charcoal: #333333;
+        }
+
+        /* Extend Tailwind CSS with custom colors */
+        @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+
+        /* Custom styles for Lucide icons */
+        .lucide {
+            stroke: currentColor; /* Icons inherit color from parent text */
+            stroke-width: 2;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--color-runam-charcoal);
+            background-color: var(--color-runam-light-grey);
+        }
+
+        /* Ensure smooth transitions for hover effects */
+        .transition-all {
+            transition-property: all;
+            transition-duration: 300ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom scrollbar for sidebar on desktop */
+        .sidebar-scroll {
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: var(--color-runam-green) var(--color-runam-light-grey); /* Firefox */
+        }
+
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: var(--color-runam-light-grey);
+            border-radius: 10px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: var(--color-runam-green);
+            border-radius: 10px;
+            border: 2px solid var(--color-runam-light-grey);
+        }
+    </style>
+    <script>
+        // Configure Tailwind CSS with custom colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'runam-green': '#2CBA76',
+                        'runam-yellow': '#FFD700',
+                        'runam-light-grey': '#F5F5F5',
+                        'runam-charcoal': '#333333',
+                    },
+                },
+            },
+        };
+
+        // JavaScript for mobile menu and sidebar toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+
+            // Toggle mobile navigation menu
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Toggle sidebar visibility on smaller screens
+            if (sidebarToggleButton && sidebar && mainContent) {
+                sidebarToggleButton.addEventListener('click', () => {
+                    sidebar.classList.toggle('-translate-x-full'); // For mobile sidebar slide
+                    sidebar.classList.toggle('hidden'); // For desktop sidebar toggle
+                    // Adjust main content margin only if sidebar is visible on desktop
+                    if (window.innerWidth >= 768) { // md breakpoint
+                        mainContent.classList.toggle('md:ml-64');
+                    }
+                });
+            }
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+        });
+    </script>
 </head>
-<body>
-    
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header Section (Top Navbar - Consistent with other pages) -->
+    <header class="bg-white shadow-md py-4 px-6 md:px-10 flex justify-between items-center relative z-20">
+        <!-- Logo -->
+        <div class="text-2xl font-bold text-runam-charcoal">
+            Runam<span class="text-runam-green">Technologies</span>
+        </div>
+
+        <!-- Mobile Menu Button (Hamburger) -->
+        <button id="mobile-menu-button" class="md:hidden text-runam-charcoal focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Home</a>
+            <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">About Us</a>
+            <a href="contact.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Contact</a>
+            <a href="dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">User Dashboard</a>
+            <a href="admin-dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Admin Dashboard</a>
+        </nav>
+
+        <!-- Mobile Navigation Menu (Hidden by default, toggled by button) -->
+        <nav id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 flex flex-col items-center space-y-4">
+            <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Home</a>
+            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">How it Works</a>
+            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Services</a>
+            <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">About Us</a>
+            <a href="contact.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Contact</a>
+            <a href="dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">User Dashboard</a>
+            <a href="admin-dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Admin Dashboard</a>
+        </nav>
+    </header>
+
+    <!-- Main Content Area with Sidebar -->
+    <div class="flex flex-1">
+        <!-- Sidebar (Admin Sidebar - Consistent with Admin Dashboard) -->
+        <aside id="sidebar" class="bg-runam-charcoal text-runam-light-grey w-64 p-6 space-y-6 flex-shrink-0
+                                   transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out
+                                   md:relative fixed inset-y-0 left-0 z-10 overflow-y-auto sidebar-scroll">
+            <div class="text-xl font-semibold mb-8">Admin Menu</div>
+            <nav class="space-y-3">
+                <a href="admin-dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="layout-dashboard" class="lucide"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="users" class="lucide"></i>
+                    <span>Manage Users</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg bg-runam-green text-white transition-all">
+                    <i data-lucide="package" class="lucide"></i>
+                    <span>Manage Orders</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="truck" class="lucide"></i>
+                    <span>Delivery Tracking</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="bar-chart-2" class="lucide"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="settings" class="lucide"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="log-out" class="lucide"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area - Order Management Table -->
+        <main id="main-content" class="flex-grow p-6 md:p-10 transition-all duration-300 ease-in-out md:ml-64">
+            <!-- Sidebar Toggle Button for Mobile/Tablet -->
+            <button id="sidebar-toggle-button" class="md:hidden bg-runam-green text-white p-3 rounded-full shadow-lg fixed bottom-6 right-6 z-30 focus:outline-none focus:ring-2 focus:ring-runam-green focus:ring-opacity-75">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
+            <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Order Management</h1>
+
+            <!-- Search and Filter Bar (Optional) -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <div class="relative w-full sm:w-1/2">
+                    <input type="text" placeholder="Search by Order ID or Customer Name..."
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all">
+                    <i data-lucide="search" class="lucide absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <div class="relative w-full sm:w-1/4">
+                    <select class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all">
+                        <option value="">Filter by Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="in-transit">In Transit</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="lucide absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                </div>
+                <button class="w-full sm:w-auto bg-runam-green text-white font-semibold py-2 px-6 rounded-lg hover:bg-opacity-90 transition-all shadow-md">
+                    Apply Filters
+                </button>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-runam-light-grey">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">Order ID</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Sample Order Row 1 -->
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-runam-charcoal">#RUNAM001</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Alice Johnson</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-runam-yellow text-runam-charcoal">Pending</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button class="text-runam-green hover:text-runam-charcoal transition-all" title="Edit Order">
+                                    <i data-lucide="edit" class="lucide"></i>
+                                </button>
+                                <button class="text-blue-500 hover:text-blue-700 transition-all" title="Assign Rider">
+                                    <i data-lucide="user-plus" class="lucide"></i>
+                                </button>
+                                <button class="text-red-500 hover:text-red-700 transition-all" title="Mark Delivered">
+                                    <i data-lucide="check-circle" class="lucide"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Sample Order Row 2 -->
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-runam-charcoal">#RUNAM002</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Bob Williams</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Assigned</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button class="text-runam-green hover:text-runam-charcoal transition-all" title="Edit Order">
+                                    <i data-lucide="edit" class="lucide"></i>
+                                </button>
+                                <button class="text-blue-500 hover:text-blue-700 transition-all" title="Assign Rider">
+                                    <i data-lucide="user-plus" class="lucide"></i>
+                                </button>
+                                <button class="text-red-500 hover:text-red-700 transition-all" title="Mark Delivered">
+                                    <i data-lucide="check-circle" class="lucide"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Sample Order Row 3 -->
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-runam-charcoal">#RUNAM003</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Charlie Davis</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Delivered</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button class="text-runam-green hover:text-runam-charcoal transition-all" title="Edit Order">
+                                    <i data-lucide="edit" class="lucide"></i>
+                                </button>
+                                <button class="text-blue-500 hover:text-blue-700 transition-all" title="Assign Rider">
+                                    <i data-lucide="user-plus" class="lucide"></i>
+                                </button>
+                                <button class="text-red-500 hover:text-red-700 transition-all" title="Mark Delivered">
+                                    <i data-lucide="check-circle" class="lucide"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Sample Order Row 4 -->
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-runam-charcoal">#RUNAM004</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Diana Prince</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">In Transit</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button class="text-runam-green hover:text-runam-charcoal transition-all" title="Edit Order">
+                                    <i data-lucide="edit" class="lucide"></i>
+                                </button>
+                                <button class="text-blue-500 hover:text-blue-700 transition-all" title="Assign Rider">
+                                    <i data-lucide="user-plus" class="lucide"></i>
+                                </button>
+                                <button class="text-red-500 hover:text-red-700 transition-all" title="Mark Delivered">
+                                    <i data-lucide="check-circle" class="lucide"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Section (Consistent with other pages) -->
+    <footer class="bg-runam-charcoal text-runam-light-grey py-8 px-6 md:px-10 text-center z-20">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p class="text-sm">&copy; 2025 Runam Technologies. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">Privacy Policy</a>
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">Terms of Service</a>
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">FAQ</a>
+            </div>
+            <div class="flex space-x-4">
+                <!-- Social Media Icons (placeholders - using Lucide for consistency) -->
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
+                    <i data-lucide="facebook" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
+                    <i data-lucide="twitter" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
+                    <i data-lucide="linkedin" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>

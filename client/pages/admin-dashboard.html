@@ -3,9 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard - Runam Technologies</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom Tailwind Colors */
+        :root {
+            --color-runam-green: #2CBA76;
+            --color-runam-yellow: #FFD700;
+            --color-runam-light-grey: #F5F5F5;
+            --color-runam-charcoal: #333333;
+        }
+
+        /* Extend Tailwind CSS with custom colors */
+        @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+
+        /* Custom styles for Lucide icons */
+        .lucide {
+            stroke: currentColor; /* Icons inherit color from parent text */
+            stroke-width: 2;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--color-runam-charcoal);
+            background-color: var(--color-runam-light-grey);
+        }
+
+        /* Ensure smooth transitions for hover effects */
+        .transition-all {
+            transition-property: all;
+            transition-duration: 300ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom scrollbar for sidebar on desktop */
+        .sidebar-scroll {
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: var(--color-runam-green) var(--color-runam-light-grey); /* Firefox */
+        }
+
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: var(--color-runam-light-grey);
+            border-radius: 10px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: var(--color-runam-green);
+            border-radius: 10px;
+            border: 2px solid var(--color-runam-light-grey);
+        }
+    </style>
+    <script>
+        // Configure Tailwind CSS with custom colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'runam-green': '#2CBA76',
+                        'runam-yellow': '#FFD700',
+                        'runam-light-grey': '#F5F5F5',
+                        'runam-charcoal': '#333333',
+                    },
+                },
+            },
+        };
+
+        // JavaScript for mobile menu and sidebar toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+
+            // Toggle mobile navigation menu
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Toggle sidebar visibility on smaller screens
+            if (sidebarToggleButton && sidebar && mainContent) {
+                sidebarToggleButton.addEventListener('click', () => {
+                    sidebar.classList.toggle('-translate-x-full'); // For mobile sidebar slide
+                    sidebar.classList.toggle('hidden'); // For desktop sidebar toggle
+                    // Adjust main content margin only if sidebar is visible on desktop
+                    if (window.innerWidth >= 768) { // md breakpoint
+                        mainContent.classList.toggle('md:ml-64');
+                    }
+                });
+            }
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+        });
+    </script>
 </head>
-<body>
-    
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header Section (Top Navbar - Consistent with other pages) -->
+    <header class="bg-white shadow-md py-4 px-6 md:px-10 flex justify-between items-center relative z-20">
+        <!-- Logo -->
+        <div class="text-2xl font-bold text-runam-charcoal">
+            Runam<span class="text-runam-green">Technologies</span>
+        </div>
+
+        <!-- Mobile Menu Button (Hamburger) -->
+        <button id="mobile-menu-button" class="md:hidden text-runam-charcoal focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <!-- Desktop Navigation Links (Optional, can be removed if sidebar is primary) -->
+        <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Home</a>
+            <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">About Us</a>
+            <a href="contact.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Contact</a>
+            <a href="dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">User Dashboard</a>
+            <a href="#" class="text-runam-green font-medium transition-all">Admin Dashboard</a>
+        </nav>
+
+        <!-- Mobile Navigation Menu (Hidden by default, toggled by button) -->
+        <nav id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 flex flex-col items-center space-y-4">
+            <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Home</a>
+            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">How it Works</a>
+            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Services</a>
+            <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">About Us</a>
+            <a href="contact.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Contact</a>
+            <a href="dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">User Dashboard</a>
+            <a href="#" class="text-runam-green font-medium transition-all w-full text-center py-2">Admin Dashboard</a>
+        </nav>
+    </header>
+
+    <!-- Main Content Area with Sidebar -->
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-runam-charcoal text-runam-light-grey w-64 p-6 space-y-6 flex-shrink-0
+                                   transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out
+                                   md:relative fixed inset-y-0 left-0 z-10 overflow-y-auto sidebar-scroll">
+            <div class="text-xl font-semibold mb-8">Admin Menu</div>
+            <nav class="space-y-3">
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg bg-runam-green text-white transition-all">
+                    <i data-lucide="layout-dashboard" class="lucide"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="users" class="lucide"></i>
+                    <span>Manage Users</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="package" class="lucide"></i>
+                    <span>Manage Orders</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="truck" class="lucide"></i>
+                    <span>Delivery Tracking</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="bar-chart-2" class="lucide"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="settings" class="lucide"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                    <i data-lucide="log-out" class="lucide"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Dashboard Content -->
+        <main id="main-content" class="flex-grow p-6 md:p-10 transition-all duration-300 ease-in-out md:ml-64">
+            <!-- Sidebar Toggle Button for Mobile/Tablet -->
+            <button id="sidebar-toggle-button" class="md:hidden bg-runam-green text-white p-3 rounded-full shadow-lg fixed bottom-6 right-6 z-30 focus:outline-none focus:ring-2 focus:ring-runam-green focus:ring-opacity-75">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
+            <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Admin Dashboard</h1>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+                <!-- Total Users Card -->
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition-all hover:shadow-lg hover:scale-105">
+                    <div class="p-3 bg-runam-green rounded-full text-white">
+                        <i data-lucide="users" class="lucide w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Total Users</p>
+                        <p class="text-3xl font-bold text-runam-charcoal">1,250</p>
+                    </div>
+                </div>
+                <!-- Total Orders Card -->
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition-all hover:shadow-lg hover:scale-105">
+                    <div class="p-3 bg-runam-yellow rounded-full text-runam-charcoal">
+                        <i data-lucide="package" class="lucide w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Total Orders</p>
+                        <p class="text-3xl font-bold text-runam-charcoal">5,890</p>
+                    </div>
+                </div>
+                <!-- Active Deliveries Card -->
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition-all hover:shadow-lg hover:scale-105">
+                    <div class="p-3 bg-runam-charcoal rounded-full text-white">
+                        <i data-lucide="truck" class="lucide w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Active Deliveries</p>
+                        <p class="text-3xl font-bold text-runam-green">45</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Visualization Placeholders -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Orders Over Time Chart Placeholder -->
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
+                        <i data-lucide="line-chart" class="lucide text-runam-green mr-3"></i> Orders Over Time
+                    </h2>
+                    <div class="h-64 bg-runam-light-grey rounded-lg flex items-center justify-center text-gray-500">
+                        [Placeholder for Line Chart: Orders per day/week]
+                    </div>
+                </section>
+
+                <!-- User Registration Trend Placeholder -->
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
+                        <i data-lucide="trending-up" class="lucide text-runam-green mr-3"></i> User Registration Trend
+                    </h2>
+                    <div class="h-64 bg-runam-light-grey rounded-lg flex items-center justify-center text-gray-500">
+                        [Placeholder for Bar Chart: New users per month]
+                    </div>
+                </section>
+
+                <!-- Delivery Status Distribution Placeholder -->
+                <section class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
+                    <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
+                        <i data-lucide="pie-chart" class="lucide text-runam-green mr-3"></i> Delivery Status Distribution
+                    </h2>
+                    <div class="h-64 bg-runam-light-grey rounded-lg flex items-center justify-center text-gray-500">
+                        [Placeholder for Pie Chart: Pending, In-transit, Delivered]
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Section (Consistent with other pages) -->
+    <footer class="bg-runam-charcoal text-runam-light-grey py-8 px-6 md:px-10 text-center z-20">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p class="text-sm">&copy; 2025 Runam Technologies. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">Privacy Policy</a>
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">Terms of Service</a>
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">FAQ</a>
+            </div>
+            <div class="flex space-x-4">
+                <!-- Social Media Icons (placeholders - using Lucide for consistency) -->
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
+                    <i data-lucide="facebook" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
+                    <i data-lucide="twitter" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
+                    <i data-lucide="linkedin" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>
