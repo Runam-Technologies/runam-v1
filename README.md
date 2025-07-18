@@ -1,6 +1,6 @@
 # Runam Technologies
 
-Runam Technologies is a platform built to streamline and manage collaborative purchasing and administrative tasks. This project includes a frontend developed with HTML, CSS, and JavaScript, and plans for a backend powered by Node.js.
+Runam is a delivery service founded on the principles of speed, reliability and customers satisfaction. This project includes a frontend developed with HTML, CSS, and JavaScript, and a backend powered by PHP.
 
 ## 📁 Folder Structure
 
@@ -26,7 +26,7 @@ To view the site:
 2. Open `index.html` in your browser.
 
 ### Backend (Planned)
-- Setup Node.js server in `server/` directory.
+- Setup Xampp.
 
 ## 📄 Documentation
 See `docs/` folder for the SRS document and proposals.
