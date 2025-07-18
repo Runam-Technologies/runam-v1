@@ -33,5 +33,5 @@ See `docs/` folder for the SRS document and proposals.
 
 ## 🛠 Technologies Used
 - HTML, CSS, JavaScript
-- (Planned) Node.js, Express
+- PHP
 
