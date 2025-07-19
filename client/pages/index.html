@@ -79,7 +79,20 @@
                 },
             },
         };
-        
+        // JavaScript for mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+        });
     </script>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -117,7 +130,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="hero-section text-white py-15 md:py-32 lg:py-28 flex items-center justify-center text-center relative overflow-hidden flex-grow">
+    <section class="hero-section min-h-screen text-white py-20 md:py-32 lg:py-28 flex items-center justify-center text-center relative overflow-hidden flex-grow">
         <div class="hero-overlay"></div>
         <div class="relative z-10 p-4 max-w-4xl mx-auto">
             <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 drop-shadow-lg">
@@ -126,7 +139,7 @@
             <p class="text-lg sm:text-xl md:text-2xl mb-10 opacity-90 drop-shadow-md">
                 Effortless deliveries for everything you need, right to your hostel, lodge or lecture hall.
             </p>
-            <a href="#" class="inline-block bg-runam-yellow text-runam-charcoal font-bold py-4 px-10 rounded-full text-lg md:text-xl shadow-lg hover:bg-yellow-400 transition-all transform hover:scale-105">
+            <a href="user-registration.html" class="inline-block bg-runam-yellow text-runam-charcoal font-bold py-4 px-10 rounded-full text-lg md:text-xl shadow-lg hover:bg-yellow-400 transition-all transform hover:scale-105">
                 Get Started
             </a>
         </div>
