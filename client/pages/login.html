@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Runam Technologies</title>
+    <title>Login - Runam Technologies</title>
+    <title>Login - Runam Technologies</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
@@ -45,24 +46,219 @@
             transition-duration: 300ms;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         }
-    </style>
-    <script>
-        // Configure Tailwind CSS with custom colors
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'runam-green': '#2CBA76',
-                        'runam-yellow': '#FFD700',
-                        'runam-light-grey': '#F5F5F5',
-                        'runam-charcoal': '#333333',
-                    },
-                },
-            },
-        };
 
-        // JavaScript for mobile menu toggle
+        /* Modal styling */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .modal-content {
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        
+        .modal-content.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-[var(--color-runam-light-grey)] shadow-md py-4 px-6 md:px-10 flex justify-between items-center relative z-10">
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center space-x-2">
+            <div>
+                <img src="../assets/images/runam-logo.png" class="w-40"/>
+            </div>
+        </a>
+
+        <!-- Mobile Menu Button (Hamburger) -->
+        <button id="mobile-menu-button" class="md:hidden text-[var(--color-runam-charcoal)] focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <!-- Navigation Links (Desktop) -->
+        <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all">Home</a>
+            <a href="about.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all">About Us</a>
+            <a href="contact.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all">Contact</a>
+        </nav>
+
+        <!-- Mobile Navigation Menu -->
+        <nav id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-[var(--color-runam-light-grey)] shadow-lg py-4 flex flex-col items-center space-y-4">
+            <a href="index.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all w-full text-center py-2">Home</a>
+            <a href="about.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all w-full text-center py-2">About Us</a>
+            <a href="contact.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all w-full text-center py-2">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Main Content Area - Login Form -->
+    <main class="flex-grow flex items-center justify-center py-16 px-6 md:px-10">
+        <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
+            <h1 class="text-3xl sm:text-4xl font-bold text-center text-[var(--color-runam-charcoal)] mb-8">Welcome Back</h1>
+            <p class="text-center text-[var(--color-runam-charcoal)] opacity-80 mb-8">Log in to keep track of your delivery!</p>
+
+            <form id="login-form" class="space-y-6">
+                <div id="status-message-container" class="hidden p-4 rounded-lg text-sm mb-4" role="alert"></div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-[var(--color-runam-charcoal)] mb-2">
+                        <i data-lucide="mail" class="lucide inline-block align-middle mr-2"></i> Email Address
+                    </label>
+                    <input type="email" id="email" name="email" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-runam-green)] focus:border-transparent transition-all"
+                        placeholder="e.g., jane.doe@example.com">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-[var(--color-runam-charcoal)] mb-2">
+                        <i data-lucide="lock" class="lucide inline-block align-middle mr-2"></i> Password
+                    </label>
+                    <input type="password" id="password" name="password" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-runam-green)] focus:border-transparent transition-all"
+                        placeholder="Minimum 8 characters">
+                </div>
+                
+
+                <button type="submit" id="login-button"
+                    class="w-full bg-[var(--color-runam-green)] text-white font-semibold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-runam-green)] focus:ring-opacity-75">
+
+                
+                    Login
+                </button>
+
+            </form>
+
+            <p class="text-center text-sm text-[var(--color-runam-charcoal)] opacity-80 mt-6">
+                Don't have an account? <a href="user-registration.html" class="text-[var(--color-runam-green)] hover:underline font-medium">Register</a>
+            </p>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-[var(--color-runam-charcoal)] text-[var(--color-runam-light-grey)] py-8 px-6 md:px-10 text-center">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p class="text-sm">&copy; 2025 Runam Technologies. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all text-sm">Privacy Policy</a>
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all text-sm">Terms of Service</a>
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all text-sm">FAQ</a>
+            </div>
+            <div class="flex space-x-4">
+                <!-- Social Media Icons (placeholders - using Lucide for consistency) -->
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all">
+                    <i data-lucide="facebook" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all">
+                    <i data-lucide="twitter" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all">
+                    <i data-lucide="linkedin" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals Container -->
+    <div id="modals-container"></div>
+
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Define the base URL for the API
+            const BASE_URL = 'https://runam-backend.onrender.com/';
+
+            // Get form elements
+            const loginForm = document.getElementById('login-form');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginButton = document.getElementById('login-button');
+            const modalsContainer = document.getElementById('modals-container');
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // Renders a modal for success or error messages
+            const renderModal = (type, title, message) => {
+                modalsContainer.innerHTML = `
+                    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay opacity-0">
+                        <div class="p-8 rounded-xl shadow-2xl w-full max-w-sm modal-content opacity-0
+                                    ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold">${title}</h3>
+                                <button class="text-2xl font-bold close-modal-btn">&times;</button>
+                            </div>
+                            <p>${message}</p>
+                        </div>
+                    </div>
+                `;
+                const overlay = modalsContainer.querySelector('.modal-overlay');
+                const content = modalsContainer.querySelector('.modal-content');
+                setTimeout(() => {
+                    overlay.classList.add('opacity-100');
+                    content.classList.add('show');
+                }, 10);
+                const closeModal = () => {
+                    overlay.classList.remove('opacity-100');
+                    content.classList.remove('show');
+                    setTimeout(() => modalsContainer.innerHTML = '', 300);
+                };
+                modalsContainer.querySelector('.close-modal-btn').addEventListener('click', closeModal);
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) closeModal();
+                });
+            };
+
+            // Handles the form submission
+            loginForm.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent the default form submission behavior
+
+                // Get form data
+                const email = emailInput.value;
+                const password = passwordInput.value;
+
+                // Disable the button and show a loading state
+                loginButton.disabled = true;
+                loginButton.textContent = 'Logging in...';
+
+                try {
+                    // Make the API call to the login endpoint
+                    const response = await fetch(`${BASE_URL}/auth/login.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password }),
+                    });
+                    
+                    const result = await response.json();
+                    console.log(result);
+
+                    if (result.status === 'success') {
+                        // On success, show a success message and redirect
+                        renderModal('success', 'Login Successful', 'Redirecting to your dashboard.');
+                        setTimeout(() => {
+                            window.location.href = 'user-dashboard.html';
+                        }, 1000);
+                    } else {
+                        // On failure, show an error message
+                        console.log(result);
+                        renderModal('error', 'Login Failed', result.message || 'Invalid email or password.');
+                    }
+                } catch (error) {
+                    console.error('Error during login:', error);
+                    renderModal('error', 'Network Error', 'Could not connect to the server. Please check your network.');
+                } finally {
+                    // Re-enable the button
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Login';
+                }
+            });
+
+            // JavaScript for mobile menu toggle
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
 
@@ -71,106 +267,7 @@
                     mobileMenu.classList.toggle('hidden');
                 });
             }
-
-            // Initialize Lucide icons
-            lucide.createIcons();
         });
     </script>
-</head>
-<body class="min-h-screen flex flex-col">
-
-    <!-- Header Section (Consistent with other pages) -->
-    <header class="bg-runam-light-grey shadow-md py-4 px-6 md:px-10 flex justify-between items-center relative z-10">
-        <!-- Logo -->
-        <div>
-            <img src="../assets/images/runam-logo.png" class="w-40"/>
-        </div>
-
-        <!-- Mobile Menu Button (Hamburger) -->
-        <button id="mobile-menu-button" class="md:hidden text-runam-charcoal focus:outline-none">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button>
-
-        <!-- Navigation Links (Desktop) -->
-        <nav class="hidden md:flex space-x-8">
-            <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Home</a>
-            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">How it Works</a>
-            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Services</a>
-            <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">About Us</a>
-            <a href="contact.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Contact</a>
-        </nav>
-
-        <!-- Mobile Navigation Menu -->
-        <nav id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-runam-light-grey shadow-lg py-4 flex flex-col items-center space-y-4">
-            <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Home</a>
-            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">How it Works</a>
-            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Services</a>
-            <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">About Us</a>
-            <a href="contact.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Contact</a>
-        </nav>
-    </header>
-
-    <!-- Main Content Area - Login Form -->
-    <main class="flex-grow flex items-center justify-center py-16 px-6 md:px-10">
-        <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
-            <h1 class="text-3xl sm:text-4xl font-bold text-center text-runam-charcoal mb-8">Welcome Back</h1>
-            <p class="text-center text-runam-charcoal opacity-80 mb-8">Log in to keep track of your delivery!</p>
-
-            <form action="#" method="POST" class="space-y-6">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-runam-charcoal mb-2">
-                        <i data-lucide="mail" class="lucide inline-block align-middle mr-2"></i> Email Address
-                    </label>
-                    <input type="email" id="email" name="email" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all"
-                        placeholder="e.g., jane.doe@example.com">
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-runam-charcoal mb-2">
-                        <i data-lucide="lock" class="lucide inline-block align-middle mr-2"></i> Password
-                    </label>
-                    <input type="password" id="password" name="password" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all"
-                        placeholder="Minimum 8 characters">
-                </div>
-                
-                 <a href="user-dashboard.html"
-                    class="block mx-auto bg-runam-green text-white font-semibold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-runam-green focus:ring-opacity-75">
-                    Login
-                </a>
-            </form>
-
-            <p class="text-center text-sm text-runam-charcoal opacity-80 mt-6">
-                Don't have an account? <a href="user-registration.html" class="text-runam-green hover:underline font-medium">Register</a>
-            </p>
-        </div>
-    </main>
-
-    <!-- Footer Section (Consistent with other pages) -->
-    <footer class="bg-runam-charcoal text-runam-light-grey py-8 px-6 md:px-10 text-center">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p class="text-sm">&copy; 2025 Runam Technologies. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">Privacy Policy</a>
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">Terms of Service</a>
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">FAQ</a>
-            </div>
-            <div class="flex space-x-4">
-                <!-- Social Media Icons (placeholders - using Lucide for consistency) -->
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
-                    <i data-lucide="facebook" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
-                </a>
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
-                    <i data-lucide="twitter" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
-                </a>
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
-                    <i data-lucide="linkedin" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
-                </a>
-            </div>
-        </div>
-    </footer>
-
 </body>
 </html>

@@ -10,8 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Custom Tailwind Colors */
+        /* Define custom color variables */
         :root {
             --color-runam-green: #2CBA76;
             --color-runam-yellow: #FFD700;
@@ -19,76 +21,219 @@
             --color-runam-charcoal: #333333;
         }
 
-        /* Extend Tailwind CSS with custom colors */
-        @tailwind base;
-        @tailwind components;
-        @tailwind utilities;
-
-        /* Custom styles for Lucide icons */
-        .lucide {
-            stroke: currentColor; /* Icons inherit color from parent text */
-            stroke-width: 2;
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Base styles */
+        /* Base styles for the entire page */
         body {
             font-family: 'Inter', sans-serif;
             color: var(--color-runam-charcoal);
             background-color: var(--color-runam-light-grey);
         }
-
-        /* Ensure smooth transitions for hover effects */
-        .transition-all {
-            transition-property: all;
-            transition-duration: 300ms;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Custom scrollbar for sidebar on desktop */
+        
+        /* Custom scrollbar for sidebar */
         .sidebar-scroll {
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: var(--color-runam-green) var(--color-runam-light-grey); /* Firefox */
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-runam-green) var(--color-runam-light-grey);
         }
-
+        
         .sidebar-scroll::-webkit-scrollbar {
             width: 8px;
         }
-
+        
         .sidebar-scroll::-webkit-scrollbar-track {
             background: var(--color-runam-light-grey);
             border-radius: 10px;
         }
-
+        
         .sidebar-scroll::-webkit-scrollbar-thumb {
             background-color: var(--color-runam-green);
             border-radius: 10px;
             border: 2px solid var(--color-runam-light-grey);
         }
-    </style>
-    <script>
-        // Configure Tailwind CSS with custom colors
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'runam-green': '#2CBA76',
-                        'runam-yellow': '#FFD700',
-                        'runam-light-grey': '#F5F5F5',
-                        'runam-charcoal': '#333333',
-                    },
-                },
-            },
-        };
+        
+        /* Modal styling */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .modal-content {
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        
+        .modal-content.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
 
-        // JavaScript for mobile menu and sidebar toggle
+        /* Active sidebar link style */
+        .sidebar-link.active {
+            background-color: var(--color-runam-green);
+            color: white;
+        }
+
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .data-table thead th {
+            background-color: var(--color-runam-light-grey);
+            font-weight: 600;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header Section (Top Navbar) -->
+    <header class="bg-white shadow-md py-4 px-6 md:px-10 flex justify-between items-center relative z-20">
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center space-x-2">
+            <div>
+                <img src="../assets/images/runam-logo.png" class="w-40"/>
+            </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all">Home</a>
+            <a href="about.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all">About Us</a>
+            <a href="user-dashboard.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all">User Dashboard</a>
+            <a href="admin-dashboard.html" class="text-[var(--color-runam-green)] font-medium transition-all">Admin Dashboard</a>
+        </nav>
+
+        <!-- Mobile Menu Button (Hamburger) -->
+        <button id="mobile-menu-button" class="md:hidden text-[var(--color-runam-charcoal)] focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <!-- Mobile Navigation Menu (Hidden by default, toggled by button) -->
+        <nav id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 flex flex-col items-center space-y-4">
+            <a href="index.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all w-full text-center py-2">Home</a>
+            <a href="about.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all w-full text-center py-2">About Us</a>
+            <a href="contact.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all w-full text-center py-2">Contact</a>
+            <a href="user-dashboard.html" class="text-[var(--color-runam-charcoal)] hover:text-[var(--color-runam-green)] font-medium transition-all w-full text-center py-2">User Dashboard</a>
+            <a href="admin-dashboard.html" class="text-[var(--color-runam-green)] font-medium transition-all w-full text-center py-2">Admin Dashboard</a>
+        </nav>
+    </header>
+
+    <!-- Main Content Area with Sidebar -->
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-[var(--color-runam-charcoal)] text-[var(--color-runam-light-grey)] w-64 p-6 space-y-6 flex-shrink-0
+                                   transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out
+                                   md:relative fixed inset-y-0 left-0 z-10 overflow-y-auto sidebar-scroll">
+            <div class="text-xl font-semibold mb-8">Admin Menu</div>
+            <nav id="sidebar-nav" class="space-y-3">
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-[var(--color-runam-green)] hover:text-white transition-all active" data-page="dashboard">
+                    <i data-lucide="layout-dashboard" class="lucide"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-[var(--color-runam-green)] hover:text-white transition-all" data-page="users">
+                    <i data-lucide="users" class="lucide"></i>
+                    <span>Manage Users</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-[var(--color-runam-green)] hover:text-white transition-all" data-page="orders">
+                    <i data-lucide="package" class="lucide"></i>
+                    <span>Manage Orders</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-[var(--color-runam-green)] hover:text-white transition-all" data-page="delivery">
+                    <i data-lucide="truck" class="lucide"></i>
+                    <span>Delivery Tracking</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-[var(--color-runam-green)] hover:text-white transition-all" data-page="reports">
+                    <i data-lucide="bar-chart-2" class="lucide"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-[var(--color-runam-green)] hover:text-white transition-all" data-page="settings">
+                    <i data-lucide="settings" class="lucide"></i>
+                    <span>Settings</span>
+                </a>
+                <button id="logout-button" class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-red-500 hover:text-white transition-all">
+                    <i data-lucide="log-out" class="lucide"></i>
+                    <span>Logout</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Dashboard Content -->
+        <main id="main-content" class="flex-grow p-6 md:p-10 transition-all duration-300 ease-in-out md:ml-64">
+            <!-- Sidebar Toggle Button for Mobile/Tablet -->
+            <button id="sidebar-toggle-button" class="md:hidden bg-[var(--color-runam-green)] text-white p-3 rounded-full shadow-lg fixed bottom-6 right-6 z-30 focus:outline-none focus:ring-2 focus:ring-[var(--color-runam-green)] focus:ring-opacity-75">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            
+            <!-- Dynamic content will be loaded here -->
+        </main>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="bg-[var(--color-runam-charcoal)] text-[var(--color-runam-light-grey)] py-8 px-6 md:px-10 text-center z-20">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p class="text-sm">&copy; 2025 Runam Technologies. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all text-sm">Privacy Policy</a>
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all text-sm">Terms of Service</a>
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all text-sm">FAQ</a>
+            </div>
+            <div class="flex space-x-4">
+                <!-- Social Media Icons -->
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all">
+                    <i data-lucide="facebook" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all">
+                    <i data-lucide="twitter" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+                <a href="#" class="text-[var(--color-runam-light-grey)] hover:text-[var(--color-runam-green)] transition-all">
+                    <i data-lucide="linkedin" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals Container -->
+    <div id="modals-container"></div>
+
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Define the base URL for the API
+            const BASE_URL = 'https://runam-backend.onrender.com/';
+
+            // DOM elements
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
             const sidebar = document.getElementById('sidebar');
+            const sidebarNav = document.getElementById('sidebar-nav');
             const mainContent = document.getElementById('main-content');
+            const logoutButton = document.getElementById('logout-button');
+            const modalsContainer = document.getElementById('modals-container');
+
+            // Store current chart instances and interval to destroy them before rendering new ones
+            let ordersChart, usersChart, statusChart, monthlyOrdersChart;
+            let deliveryInterval;
+
+            // Initialize Lucide icons
+            lucide.createIcons();
 
             // Toggle mobile navigation menu
             if (mobileMenuButton && mobileMenu) {
@@ -98,201 +243,1010 @@
             }
 
             // Toggle sidebar visibility on smaller screens
-            if (sidebarToggleButton && sidebar && mainContent) {
+            if (sidebarToggleButton && sidebar) {
                 sidebarToggleButton.addEventListener('click', () => {
-                    sidebar.classList.toggle('-translate-x-full'); // For mobile sidebar slide
-                    sidebar.classList.toggle('hidden'); // For desktop sidebar toggle
-                    // Adjust main content margin only if sidebar is visible on desktop
-                    if (window.innerWidth >= 768) { // md breakpoint
-                        mainContent.classList.toggle('md:ml-64');
-                    }
+                    sidebar.classList.toggle('-translate-x-full');
                 });
             }
+            
+            // Function to show a modal for success, error, or confirmation messages
+            const showModal = (type, title, message, onConfirm = null) => {
+                modalsContainer.innerHTML = `
+                    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay opacity-0">
+                        <div class="p-8 rounded-xl shadow-2xl w-full max-w-sm bg-white modal-content opacity-0
+                                    ${type === 'success' ? 'bg-green-100 text-green-800' : type === 'error' ? 'bg-red-100 text-red-800' : 'bg-white text-[var(--color-runam-charcoal)]'}">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold">${title}</h3>
+                                <button class="text-2xl font-bold close-modal-btn">&times;</button>
+                            </div>
+                            <p>${message}</p>
+                            ${onConfirm ? `<div class="flex justify-end space-x-4 mt-6">
+                                <button class="py-2 px-6 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors close-modal-btn">Cancel</button>
+                                <button id="confirm-action" class="py-2 px-6 rounded-lg bg-[var(--color-runam-green)] text-white font-semibold hover:bg-green-600 transition-colors">Confirm</button>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `;
+                const overlay = modalsContainer.querySelector('.modal-overlay');
+                const content = modalsContainer.querySelector('.modal-content');
+                setTimeout(() => {
+                    overlay.classList.add('opacity-100');
+                    content.classList.add('show');
+                }, 10);
+                const closeModal = () => {
+                    overlay.classList.remove('opacity-100');
+                    content.classList.remove('show');
+                    setTimeout(() => modalsContainer.innerHTML = '', 300);
+                };
+                modalsContainer.querySelectorAll('.close-modal-btn').forEach(btn => btn.addEventListener('click', closeModal));
+                if (onConfirm) {
+                    modalsContainer.querySelector('#confirm-action').addEventListener('click', () => {
+                        onConfirm();
+                        closeModal();
+                    });
+                }
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) closeModal();
+                });
+            };
+            
+            // Function to show a detailed order modal
+            const showOrderDetailsModal = (order) => {
+                 showModal('info', `Order #${order.id} Details`, `
+                    <div class="p-4 space-y-2">
+                        <p><strong>Order Type:</strong> ${order.order_type}</p>
+                        <p><strong>Description:</strong> ${order.order_description}</p>
+                        <p><strong>Status:</strong> <span class="capitalize font-semibold">${order.order_status}</span></p>
+                        <p><strong>Created At:</strong> ${new Date(order['created at']).toLocaleString()}</p>
+                    </div>
+                `);
+            };
 
-            // Initialize Lucide icons
-            lucide.createIcons();
+            // Function to handle logout
+            const handleLogout = async () => {
+                showModal('confirmation', 'Confirm Logout', 'Are you sure you want to log out of your admin session?', async () => {
+                    try {
+                        const response = await fetch(`${BASE_URL}/auth/admin-logout.php`);
+                        const result = await response.json();
+                        
+                        if (result.status === 'success') {
+                            showModal('success', 'Logged Out', result.message);
+                            // Redirect to the login page or homepage after a short delay
+                            setTimeout(() => {
+                                window.location.href = 'index.html'; 
+                            }, 1000);
+                        } else {
+                            showModal('error', 'Logout Failed', result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error logging out:', error);
+                        showModal('error', 'Network Error', 'Could not log out. Please check your network connection.');
+                    }
+                });
+            };
+
+            // Add click listener to the logout button
+            logoutButton.addEventListener('click', handleLogout);
+
+            // Function to destroy all active charts and intervals
+            const destroyActiveComponents = () => {
+                if (ordersChart) ordersChart.destroy();
+                if (usersChart) usersChart.destroy();
+                if (statusChart) statusChart.destroy();
+                if (monthlyOrdersChart) monthlyOrdersChart.destroy();
+                if (deliveryInterval) clearInterval(deliveryInterval);
+            };
+
+            // ---- Content Rendering Functions ----
+            
+            // Renders the main dashboard view with summary cards and charts
+            const renderDashboard = async () => {
+                destroyActiveComponents(); // Clean up old charts and intervals
+                mainContent.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-[var(--color-runam-charcoal)] mb-8">Admin Dashboard</h1>
+
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+                        <!-- Total Users Card -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition-all hover:shadow-lg hover:scale-105">
+                            <div class="p-3 bg-[var(--color-runam-green)] rounded-full text-white">
+                                <i data-lucide="users" class="lucide w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 text-sm">Total Users</p>
+                                <p id="total-users" class="text-3xl font-bold text-[var(--color-runam-charcoal)]">...</p>
+                            </div>
+                        </div>
+                        <!-- Total Orders Card -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition-all hover:shadow-lg hover:scale-105">
+                            <div class="p-3 bg-[var(--color-runam-yellow)] rounded-full text-[var(--color-runam-charcoal)]">
+                                <i data-lucide="package" class="lucide w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 text-sm">Total Orders</p>
+                                <p id="total-orders" class="text-3xl font-bold text-[var(--color-runam-charcoal)]">...</p>
+                            </div>
+                        </div>
+                        <!-- Active Deliveries Card -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition-all hover:shadow-lg hover:scale-105">
+                            <div class="p-3 bg-[var(--color-runam-charcoal)] rounded-full text-white">
+                                <i data-lucide="truck" class="lucide w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 text-sm">Active Deliveries</p>
+                                <p id="active-deliveries" class="text-3xl font-bold text-[var(--color-runam-green)]">...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Visualization Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Orders Over Time Chart -->
+                        <section class="bg-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-2xl font-semibold text-[var(--color-runam-charcoal)] mb-6 flex items-center">
+                                <i data-lucide="line-chart" class="lucide text-[var(--color-runam-green)] mr-3"></i> Orders Over Time
+                            </h2>
+                            <div id="orders-chart-container" class="h-64 flex items-center justify-center">
+                                <canvas id="ordersChart"></canvas>
+                            </div>
+                        </section>
+
+                        <!-- User Registration Trend Chart -->
+                        <section class="bg-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-2xl font-semibold text-[var(--color-runam-charcoal)] mb-6 flex items-center">
+                                <i data-lucide="trending-up" class="lucide text-[var(--color-runam-green)] mr-3"></i> User Registration Trend
+                            </h2>
+                            <div id="users-chart-container" class="h-64 flex items-center justify-center">
+                                <canvas id="usersChart"></canvas>
+                            </div>
+                        </section>
+
+                        <!-- Delivery Status Distribution Chart -->
+                        <section class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
+                            <h2 class="text-2xl font-semibold text-[var(--color-runam-charcoal)] mb-6 flex items-center">
+                                <i data-lucide="pie-chart" class="lucide text-[var(--color-runam-green)] mr-3"></i> Delivery Status Distribution
+                            </h2>
+                            <div id="status-chart-container" class="h-64 flex items-center justify-center">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </section>
+                    </div>
+                `;
+                lucide.createIcons();
+                fetchAndRenderDashboardData(); // Call function to populate with data
+            };
+            
+            // Renders the Manage Users view
+            const renderUsers = async () => {
+                destroyActiveComponents();
+                mainContent.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-[var(--color-runam-charcoal)] mb-8">Manage Users</h1>
+                    <div class="bg-white p-6 rounded-xl shadow-md table-container">
+                        <p id="users-loading" class="text-center text-gray-500 py-10">Loading users...</p>
+                        <table class="data-table hidden">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Location</th>
+                                    <th>Registered On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <!-- User data will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                lucide.createIcons();
+                fetchAndRenderUsersData();
+            };
+
+            // Renders the Manage Orders view
+            const renderOrders = async () => {
+                destroyActiveComponents();
+                mainContent.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-[var(--color-runam-charcoal)] mb-8">Manage Orders</h1>
+                    <div class="bg-white p-6 rounded-xl shadow-md table-container">
+                        <p id="orders-loading" class="text-center text-gray-500 py-10">Loading orders...</p>
+                        <table class="data-table hidden">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Order Type</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body">
+                                <!-- Order data will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                lucide.createIcons();
+                fetchAndRenderOrdersData();
+            };
+            
+            // Renders the Delivery Tracking view
+            const renderDeliveryTracking = async () => {
+                destroyActiveComponents();
+                mainContent.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-[var(--color-runam-charcoal)] mb-8">Delivery Tracking</h1>
+                    <div class="flex justify-end mb-4">
+                        <button id="refresh-delivery-btn" class="flex items-center space-x-2 py-2 px-4 bg-[var(--color-runam-green)] text-white rounded-lg shadow hover:bg-green-600 transition-colors">
+                            <i data-lucide="refresh-ccw" class="lucide w-5 h-5"></i>
+                            <span>Refresh</span>
+                        </button>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md table-container">
+                        <p id="delivery-loading" class="text-center text-gray-500 py-10">Loading active deliveries...</p>
+                        <table class="data-table hidden">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Order Type</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="delivery-table-body">
+                                <!-- Delivery data will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                lucide.createIcons();
+                fetchAndRenderDeliveryData();
+                // Set up auto-refresh every 30 seconds
+                deliveryInterval = setInterval(fetchAndRenderDeliveryData, 30000);
+                document.getElementById('refresh-delivery-btn').addEventListener('click', fetchAndRenderDeliveryData);
+            };
+
+            // Renders the Reports view
+            const renderReports = async () => {
+                destroyActiveComponents();
+                mainContent.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-[var(--color-runam-charcoal)] mb-8">Reports</h1>
+
+                    <div class="flex justify-end mb-4">
+                        <button id="generate-report-btn" class="flex items-center space-x-2 py-2 px-4 bg-[var(--color-runam-green)] text-white rounded-lg shadow hover:bg-green-600 transition-colors">
+                            <i data-lucide="download" class="lucide w-5 h-5"></i>
+                            <span>Download Report</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+                        <div class="bg-white p-6 rounded-xl shadow-md transition-all hover:shadow-lg hover:scale-105">
+                            <p class="text-gray-600 text-sm">Total Orders Completed</p>
+                            <p id="completed-orders-report" class="text-3xl font-bold text-[var(--color-runam-green)]">...</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md transition-all hover:shadow-lg hover:scale-105">
+                            <p class="text-gray-600 text-sm">Total Revenue (Simulated)</p>
+                            <p id="total-revenue-report" class="text-3xl font-bold text-[var(--color-runam-green)]">...</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md transition-all hover:shadow-lg hover:scale-105">
+                            <p class="text-gray-600 text-sm">Average Order Value (Simulated)</p>
+                            <p id="average-value-report" class="text-3xl font-bold text-[var(--color-runam-green)]">...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart for monthly orders -->
+                    <section class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-2xl font-semibold text-[var(--color-runam-charcoal)] mb-6 flex items-center">
+                            <i data-lucide="bar-chart-2" class="lucide text-[var(--color-runam-green)] mr-3"></i> Monthly Order Summary
+                        </h2>
+                        <div id="monthly-orders-chart-container" class="h-64 flex items-center justify-center">
+                            <canvas id="monthlyOrdersChart"></canvas>
+                        </div>
+                    </section>
+                `;
+                lucide.createIcons();
+                fetchAndRenderReportsData();
+                document.getElementById('generate-report-btn').addEventListener('click', () => {
+                    showModal('info', 'Report Generation', 'Generating a downloadable report is not yet supported by the API. This is a placeholder for future functionality.');
+                });
+            };
+
+            // Renders the Settings view
+            const renderSettings = async () => {
+                destroyActiveComponents();
+                mainContent.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-[var(--color-runam-charcoal)] mb-8">Settings</h1>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-2xl font-semibold text-[var(--color-runam-charcoal)] mb-6">Update Website Content</h2>
+                        <form id="content-form" class="space-y-6">
+                            <div>
+                                <label for="homepage-content" class="block text-sm font-medium text-gray-700 mb-2">Homepage Content</label>
+                                <textarea id="homepage-content" rows="6" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-runam-green)] focus:border-transparent transition-all"></textarea>
+                            </div>
+                            <div>
+                                <label for="about-content" class="block text-sm font-medium text-gray-700 mb-2">About Us Content</label>
+                                <textarea id="about-content" rows="6" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-runam-green)] focus:border-transparent transition-all"></textarea>
+                            </div>
+                            <div>
+                                <label for="contact-content" class="block text-sm font-medium text-gray-700 mb-2">Contact Us Content</label>
+                                <textarea id="contact-content" rows="6" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-runam-green)] focus:border-transparent transition-all"></textarea>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" id="save-content-btn" class="flex items-center space-x-2 py-2 px-6 bg-[var(--color-runam-green)] text-white rounded-lg shadow font-semibold hover:bg-green-600 transition-colors">
+                                    <i data-lucide="save" class="lucide w-5 h-5"></i>
+                                    <span>Save Changes</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                lucide.createIcons();
+                // Simulate fetching existing content
+                document.getElementById('homepage-content').value = 'This is the current content for the homepage. You can edit this text and save the changes.';
+                document.getElementById('about-content').value = 'Welcome to the About Us page. We are a leading tech company providing innovative solutions.';
+                document.getElementById('contact-content').value = 'You can reach us at our office or through our support email. We are available 24/7.';
+                
+                // Add event listener for the save button
+                document.getElementById('content-form').addEventListener('submit', handleContentSave);
+            };
+
+            // Function to handle saving website content
+            const handleContentSave = async (event) => {
+                event.preventDefault();
+                const saveBtn = document.getElementById('save-content-btn');
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = `<i data-lucide="loader" class="lucide w-5 h-5 animate-spin"></i><span>Saving...</span>`;
+                lucide.createIcons();
+                
+                const homepageContent = document.getElementById('homepage-content').value;
+                const aboutContent = document.getElementById('about-content').value;
+                const contactContent = document.getElementById('contact-content').value;
+                
+                try {
+                    // Array of content sections to update
+                    const updates = [];
+                    if (homepageContent) {
+                        updates.push({ content_type: 'homepage', content: homepageContent });
+                    }
+                    if (aboutContent) {
+                        updates.push({ content_type: 'about', content: aboutContent });
+                    }
+                    if (contactContent) {
+                        updates.push({ content_type: 'contact', content: contactContent });
+                    }
+
+                    // Send requests for each updated section
+                    await Promise.all(updates.map(async (update) => {
+                        const response = await fetch(`${BASE_URL}/admin/update-content.php`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(update)
+                        });
+                        const result = await response.json();
+                        if (result.status !== 'success') {
+                            throw new Error(result.message || `Failed to update ${update.content_type}`);
+                        }
+                    }));
+                    
+                    showModal('success', 'Content Saved', 'All website content has been updated successfully.');
+                } catch (error) {
+                    showModal('error', 'Update Failed', `An error occurred: ${error.message}`);
+                    console.error('Error saving content:', error);
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = `<i data-lucide="save" class="lucide w-5 h-5"></i><span>Save Changes</span>`;
+                    lucide.createIcons();
+                }
+            };
+
+
+            // Main function to fetch and render the dashboard summary and charts
+            const fetchAndRenderDashboardData = async () => {
+                const totalUsersElem = document.getElementById('total-users');
+                const totalOrdersElem = document.getElementById('total-orders');
+                const activeDeliveriesElem = document.getElementById('active-deliveries');
+
+                // Set a loading state
+                totalUsersElem.textContent = '...';
+                totalOrdersElem.textContent = '...';
+                activeDeliveriesElem.textContent = '...';
+                
+                try {
+                    // Fetch summary data
+                    const summaryResponse = await fetch(`${BASE_URL}/admin/dashboard-summary.php`);
+                    const summaryResult = await summaryResponse.json();
+                    
+                    // Fetch all users for the user registration chart
+                    const usersResponse = await fetch(`${BASE_URL}/admin/users.php`);
+                    const usersResult = await usersResponse.json();
+
+                    // Fetch all orders for the orders over time chart
+                    const ordersResponse = await fetch(`${BASE_URL}/admin/orders.php`);
+                    const ordersResult = await ordersResponse.json();
+
+                    if (summaryResult.status === 'success') {
+                        const data = summaryResult.data;
+                        const totalOrders = data.total_orders;
+                        const pendingOrders = data.pending_orders;
+                        const approvedOrders = data.approved_orders;
+
+                        // Calculate active deliveries as the sum of pending and approved orders
+                        const activeDeliveries = pendingOrders + approvedOrders;
+
+                        totalUsersElem.textContent = data.total_users.toLocaleString();
+                        totalOrdersElem.textContent = totalOrders.toLocaleString();
+                        activeDeliveriesElem.textContent = activeDeliveries.toLocaleString();
+
+                        // Render the Delivery Status Distribution Pie Chart
+                        renderStatusChart(data);
+
+                    } else {
+                        showModal('error', 'Data Fetch Failed', summaryResult.message);
+                        totalUsersElem.textContent = 'N/A';
+                        totalOrdersElem.textContent = 'N/A';
+                        activeDeliveriesElem.textContent = 'N/A';
+                    }
+
+                    if (usersResult.status === 'success') {
+                        // Render the User Registration Trend Bar Chart
+                        renderUserChart(usersResult.users);
+                    } else {
+                        console.error('Failed to fetch user data:', usersResult.message);
+                    }
+                    
+                    if (ordersResult.status === 'success') {
+                         // Render the Orders Over Time Line Chart
+                        renderOrdersChart(ordersResult.orders);
+                    } else {
+                        console.error('Failed to fetch order data:', ordersResult.message);
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching dashboard data:', error);
+                    showModal('error', 'Network Error', 'Failed to load dashboard data. Please check your network connection.');
+                    totalUsersElem.textContent = 'N/A';
+                    totalOrdersElem.textContent = 'N/A';
+                    activeDeliveriesElem.textContent = 'N/A';
+                }
+            };
+            
+            // Function to render the Delivery Status Distribution Pie Chart
+            const renderStatusChart = (data) => {
+                const pending = data.pending_orders;
+                const approved = data.approved_orders;
+                const completed = data.completed_orders;
+
+                statusChart = new Chart(document.getElementById('statusChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pending', 'Approved', 'Completed'],
+                        datasets: [{
+                            data: [pending, approved, completed],
+                            backgroundColor: ['#fcd34d', '#34d399', '#2563eb'], // Yellow, Green, Blue
+                            borderColor: ['#fff', '#fff', '#fff'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Order Status Breakdown'
+                            }
+                        }
+                    }
+                });
+            };
+
+            // Function to render the User Registration Trend Bar Chart
+            const renderUserChart = (users) => {
+                // Process user data to count registrations per month
+                const monthlyRegistrations = users.reduce((acc, user) => {
+                    const month = new Date(user['created at']).toLocaleString('default', { month: 'short', year: 'numeric' });
+                    acc[month] = (acc[month] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const labels = Object.keys(monthlyRegistrations).sort((a, b) => new Date(a) - new Date(b));
+                const data = labels.map(label => monthlyRegistrations[label]);
+                
+                usersChart = new Chart(document.getElementById('usersChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'New Users',
+                            data: data,
+                            backgroundColor: 'rgba(44, 186, 118, 0.6)', // runam-green with transparency
+                            borderColor: 'rgba(44, 186, 118, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Users'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Month'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'User Registrations Per Month'
+                            }
+                        }
+                    }
+                });
+            };
+
+            // Function to render the Orders Over Time Line Chart
+            const renderOrdersChart = (orders) => {
+                 // Process order data to count orders per day
+                const dailyOrders = orders.reduce((acc, order) => {
+                    const date = new Date(order['created at']).toLocaleDateString();
+                    acc[date] = (acc[date] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const labels = Object.keys(dailyOrders).sort((a, b) => new Date(a) - new Date(b));
+                const data = labels.map(label => dailyOrders[label]);
+
+                ordersChart = new Chart(document.getElementById('ordersChart').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Orders',
+                            data: data,
+                            borderColor: 'var(--color-runam-green)',
+                            backgroundColor: 'rgba(44, 186, 118, 0.2)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Orders'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Orders Over Time'
+                            }
+                        }
+                    }
+                });
+            };
+
+            // Fetches and displays user data in a table
+            const fetchAndRenderUsersData = async () => {
+                const loadingElem = document.getElementById('users-loading');
+                const tableElem = document.querySelector('.data-table');
+                const tableBody = document.getElementById('users-table-body');
+                
+                try {
+                    const response = await fetch(`${BASE_URL}/admin/users.php`);
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        loadingElem.classList.add('hidden');
+                        tableElem.classList.remove('hidden');
+                        tableBody.innerHTML = '';
+                        
+                        if (result.users && result.users.length > 0) {
+                            result.users.forEach(user => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${user.id}</td>
+                                    <td>${user.full_name}</td>
+                                    <td>${user.email}</td>
+                                    <td>${user.phone}</td>
+                                    <td>${user.location}</td>
+                                    <td>${new Date(user['created at']).toLocaleDateString()}</td>
+                                    <td>
+                                        <button class="delete-user-btn text-red-500 hover:text-red-700 transition-colors" data-id="${user.id}">
+                                            <i data-lucide="trash-2" class="lucide w-5 h-5"></i>
+                                        </button>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            });
+                        } else {
+                            tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 py-4">No users found.</td></tr>`;
+                        }
+                        
+                        lucide.createIcons();
+
+                        // Add event listeners for delete buttons
+                        document.querySelectorAll('.delete-user-btn').forEach(button => {
+                            button.addEventListener('click', (event) => {
+                                const userId = event.currentTarget.getAttribute('data-id');
+                                showModal('confirmation', 'Confirm Deletion', `Are you sure you want to delete user ID: ${userId}? This action cannot be undone.`, () => {
+                                    deleteUser(userId);
+                                });
+                            });
+                        });
+
+                    } else {
+                        loadingElem.textContent = `Error: ${result.message}`;
+                    }
+                } catch (error) {
+                    loadingElem.textContent = 'Network Error: Could not fetch user data.';
+                    console.error('Error fetching user data:', error);
+                }
+            };
+            
+            // Function to delete a user
+            const deleteUser = async (userId) => {
+                try {
+                    const response = await fetch(`${BASE_URL}/admin/delete-user.php?id=${userId}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        showModal('success', 'User Deleted', result.message);
+                        fetchAndRenderUsersData(); // Refresh the table
+                    } else {
+                        showModal('error', 'Deletion Failed', result.message);
+                    }
+                } catch (error) {
+                    showModal('error', 'Network Error', 'Could not delete user. Check your network connection.');
+                    console.error('Error deleting user:', error);
+                }
+            };
+
+            // Fetches and displays order data in a table
+            const fetchAndRenderOrdersData = async () => {
+                const loadingElem = document.getElementById('orders-loading');
+                const tableElem = document.querySelector('.data-table');
+                const tableBody = document.getElementById('orders-table-body');
+                
+                try {
+                    const response = await fetch(`${BASE_URL}/admin/orders.php`);
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        loadingElem.classList.add('hidden');
+                        tableElem.classList.remove('hidden');
+                        tableBody.innerHTML = '';
+                        
+                        if (result.orders && result.orders.length > 0) {
+                            result.orders.forEach(order => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${order.id}</td>
+                                    <td>${order.order_type}</td>
+                                    <td>${order.order_description}</td>
+                                    <td>
+                                        <select class="status-select p-2 rounded-lg border border-gray-300 bg-white" data-order-id="${order.id}">
+                                            <option value="pending" ${order.order_status === 'pending' ? 'selected' : ''}>Pending</option>
+                                            <option value="approved" ${order.order_status === 'approved' ? 'selected' : ''}>Approved</option>
+                                            <option value="completed" ${order.order_status === 'completed' ? 'selected' : ''}>Completed</option>
+                                        </select>
+                                    </td>
+                                    <td>${new Date(order['created at']).toLocaleDateString()}</td>
+                                    <td class="flex space-x-2">
+                                        <button class="delete-order-btn text-red-500 hover:text-red-700 transition-colors" data-id="${order.id}">
+                                            <i data-lucide="trash-2" class="lucide w-5 h-5"></i>
+                                        </button>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            });
+                        } else {
+                            tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-500 py-4">No orders found.</td></tr>`;
+                        }
+
+                        lucide.createIcons();
+
+                        // Add event listeners for status change dropdowns
+                        document.querySelectorAll('.status-select').forEach(select => {
+                            select.addEventListener('change', (event) => {
+                                const orderId = event.target.getAttribute('data-order-id');
+                                const newStatus = event.target.value;
+                                updateOrderStatus(orderId, newStatus);
+                            });
+                        });
+                        
+                        // Add event listeners for delete buttons
+                        document.querySelectorAll('.delete-order-btn').forEach(button => {
+                            button.addEventListener('click', (event) => {
+                                const orderId = event.currentTarget.getAttribute('data-id');
+                                showModal('confirmation', 'Confirm Deletion', `Are you sure you want to delete order ID: ${orderId}? This action cannot be undone.`, () => {
+                                    deleteOrder(orderId);
+                                });
+                            });
+                        });
+
+                    } else {
+                        loadingElem.textContent = `Error: ${result.message}`;
+                    }
+                } catch (error) {
+                    loadingElem.textContent = 'Network Error: Could not fetch order data.';
+                    console.error('Error fetching order data:', error);
+                }
+            };
+            
+            // Function to update an order's status
+            const updateOrderStatus = async (orderId, status) => {
+                try {
+                    const response = await fetch(`${BASE_URL}/admin/update-order-status.php`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ order_id: parseInt(orderId), status: status })
+                    });
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        showModal('success', 'Order Updated', result.message);
+                    } else {
+                        showModal('error', 'Update Failed', result.message);
+                    }
+                } catch (error) {
+                    showModal('error', 'Network Error', 'Could not update order status. Check your network connection.');
+                    console.error('Error updating order status:', error);
+                }
+            };
+
+            // Function to delete an order
+            const deleteOrder = async (orderId) => {
+                try {
+                    const response = await fetch(`${BASE_URL}/admin/delete-order.php?id=${orderId}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        showModal('success', 'Order Deleted', result.message);
+                        fetchAndRenderOrdersData(); // Refresh the table
+                    } else {
+                        showModal('error', 'Deletion Failed', result.message);
+                    }
+                } catch (error) {
+                    showModal('error', 'Network Error', 'Could not delete order. Check your network connection.');
+                    console.error('Error deleting order:', error);
+                }
+            };
+
+            // Fetches and displays delivery data
+            const fetchAndRenderDeliveryData = async () => {
+                const loadingElem = document.getElementById('delivery-loading');
+                const tableElem = document.querySelector('.data-table');
+                const tableBody = document.getElementById('delivery-table-body');
+                
+                try {
+                    const response = await fetch(`${BASE_URL}/admin/orders.php`);
+                    const result = await response.json();
+                    
+                    if (result.status === 'success' && result.orders) {
+                        const activeDeliveries = result.orders.filter(order => order.order_status === 'pending' || order.order_status === 'approved');
+                        
+                        loadingElem.classList.add('hidden');
+                        tableElem.classList.remove('hidden');
+                        tableBody.innerHTML = '';
+                        
+                        if (activeDeliveries.length > 0) {
+                            activeDeliveries.forEach(order => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${order.id}</td>
+                                    <td>${order.order_type}</td>
+                                    <td>${order.order_description}</td>
+                                    <td>
+                                        <span class="capitalize font-semibold text-white px-2 py-1 rounded-full
+                                            ${order.order_status === 'pending' ? 'bg-yellow-500' : 'bg-green-500'}">
+                                            ${order.order_status}
+                                        </span>
+                                    </td>
+                                    <td>${new Date(order['created at']).toLocaleDateString()}</td>
+                                    <td class="flex space-x-2">
+                                        <button class="view-details-btn text-blue-500 hover:text-blue-700 transition-colors" data-order-id="${order.id}">
+                                            <i data-lucide="eye" class="lucide w-5 h-5"></i>
+                                        </button>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            });
+                        } else {
+                            tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-500 py-4">No active deliveries at the moment.</td></tr>`;
+                        }
+
+                        lucide.createIcons();
+
+                        // Add event listeners for view details buttons
+                        document.querySelectorAll('.view-details-btn').forEach(button => {
+                            button.addEventListener('click', (event) => {
+                                const orderId = parseInt(event.currentTarget.getAttribute('data-order-id'));
+                                const order = activeDeliveries.find(o => o.id === orderId);
+                                if (order) {
+                                    showOrderDetailsModal(order);
+                                }
+                            });
+                        });
+
+                    } else {
+                        loadingElem.textContent = `Error: ${result.message}`;
+                    }
+                } catch (error) {
+                    loadingElem.textContent = 'Network Error: Could not fetch delivery data.';
+                    console.error('Error fetching delivery data:', error);
+                }
+            };
+            
+            // Fetches and displays data for the reports page
+            const fetchAndRenderReportsData = async () => {
+                const completedOrdersElem = document.getElementById('completed-orders-report');
+                const totalRevenueElem = document.getElementById('total-revenue-report');
+                const averageValueElem = document.getElementById('average-value-report');
+
+                // Set a loading state
+                completedOrdersElem.textContent = '...';
+                totalRevenueElem.textContent = '...';
+                averageValueElem.textContent = '...';
+
+                try {
+                    const summaryResponse = await fetch(`${BASE_URL}/admin/dashboard-summary.php`);
+                    const summaryResult = await summaryResponse.json();
+                    
+                    const ordersResponse = await fetch(`${BASE_URL}/admin/orders.php`);
+                    const ordersResult = await ordersResponse.json();
+                    
+                    if (summaryResult.status === 'success') {
+                        const completedOrders = summaryResult.data.completed_orders;
+                        completedOrdersElem.textContent = completedOrders.toLocaleString();
+
+                        // Simulate revenue data as the API doesn't provide it
+                        const simulatedRevenue = completedOrders * 150000; // Assuming an average of 150,000 for each completed order
+                        totalRevenueElem.textContent = `N${simulatedRevenue.toLocaleString()}`;
+                        
+                        const averageValue = completedOrders > 0 ? simulatedRevenue / completedOrders : 0;
+                        averageValueElem.textContent = `N${averageValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+                    } else {
+                        console.error('Failed to fetch summary data for reports:', summaryResult.message);
+                    }
+
+                    if (ordersResult.status === 'success') {
+                        renderMonthlyOrdersChart(ordersResult.orders);
+                    } else {
+                        console.error('Failed to fetch orders for reports chart:', ordersResult.message);
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching reports data:', error);
+                    showModal('error', 'Network Error', 'Failed to load report data. Please check your network connection.');
+                }
+            };
+
+            // Renders a chart for monthly orders on the reports page
+            const renderMonthlyOrdersChart = (orders) => {
+                const monthlyOrders = orders.reduce((acc, order) => {
+                    const month = new Date(order['created at']).toLocaleString('default', { month: 'short', year: 'numeric' });
+                    acc[month] = (acc[month] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const labels = Object.keys(monthlyOrders).sort((a, b) => new Date(a) - new Date(b));
+                const data = labels.map(label => monthlyOrders[label]);
+                
+                monthlyOrdersChart = new Chart(document.getElementById('monthlyOrdersChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Orders',
+                            data: data,
+                            backgroundColor: 'rgba(44, 186, 118, 0.6)',
+                            borderColor: 'rgba(44, 186, 118, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true },
+                            x: { title: { display: true, text: 'Month' } }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: 'Total Orders per Month' }
+                        }
+                    }
+                });
+            };
+
+
+            // ---- Event Listeners ----
+            
+            // Event delegation for sidebar links
+            sidebarNav.addEventListener('click', (event) => {
+                event.preventDefault();
+                const link = event.target.closest('.sidebar-link');
+                if (!link) return;
+
+                // Remove active class from all links
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active', 'bg-[var(--color-runam-green)]', 'text-white'));
+                // Add active class to the clicked link
+                link.classList.add('active', 'bg-[var(--color-runam-green)]', 'text-white');
+
+                const page = link.getAttribute('data-page');
+
+                switch (page) {
+                    case 'dashboard':
+                        renderDashboard();
+                        break;
+                    case 'users':
+                        renderUsers();
+                        break;
+                    case 'orders':
+                        renderOrders();
+                        break;
+                    case 'delivery':
+                        renderDeliveryTracking();
+                        break;
+                    case 'reports':
+                        renderReports();
+                        break;
+                    case 'settings':
+                        renderSettings();
+                        break;
+                }
+                
+                // Hide sidebar on mobile after clicking a link
+                if (!sidebar.classList.contains('-translate-x-full')) {
+                     sidebar.classList.add('-translate-x-full');
+                }
+            });
+
+            // Initial content load on page load
+            renderDashboard();
         });
     </script>
-</head>
-<body class="min-h-screen flex flex-col">
-
-    <!-- Header Section (Top Navbar - Consistent with other pages) -->
-    <header class="bg-white shadow-md py-4 px-6 md:px-10 flex justify-between items-center relative z-20">
-        <!-- Logo -->
-        <div>
-             <img src="../assets/images/runam-logo.png" class="w-40"/>
-        </div>
-
-        <!-- Mobile Menu Button (Hamburger) -->
-        <button id="mobile-menu-button" class="md:hidden text-runam-charcoal focus:outline-none">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button>
-
-        <!-- Desktop Navigation Links (Optional, can be removed if sidebar is primary) -->
-        <nav class="hidden md:flex space-x-8">
-            <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Home</a>
-            <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">About Us</a>
-            <a href="contact.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Contact</a>
-            <a href="dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">User Dashboard</a>
-            <a href="#" class="text-runam-green font-medium transition-all">Admin Dashboard</a>
-        </nav>
-
-        <!-- Mobile Navigation Menu (Hidden by default, toggled by button) -->
-        <nav id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 flex flex-col items-center space-y-4">
-            <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Home</a>
-            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">How it Works</a>
-            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Services</a>
-            <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">About Us</a>
-            <a href="contact.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Contact</a>
-            <a href="dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">User Dashboard</a>
-            <a href="#" class="text-runam-green font-medium transition-all w-full text-center py-2">Admin Dashboard</a>
-        </nav>
-    </header>
-
-    <!-- Main Content Area with Sidebar -->
-    <div class="flex flex-1">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="bg-runam-charcoal text-runam-light-grey w-64 p-6 space-y-6 flex-shrink-0
-                                   transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out
-                                   md:relative fixed inset-y-0 left-0 z-10 overflow-y-auto sidebar-scroll">
-            <div class="text-xl font-semibold mb-8">Admin Menu</div>
-            <nav class="space-y-3">
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg bg-runam-green text-white transition-all">
-                    <i data-lucide="layout-dashboard" class="lucide"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
-                    <i data-lucide="users" class="lucide"></i>
-                    <span>Manage Users</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
-                    <i data-lucide="package" class="lucide"></i>
-                    <span>Manage Orders</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
-                    <i data-lucide="truck" class="lucide"></i>
-                    <span>Delivery Tracking</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
-                    <i data-lucide="bar-chart-2" class="lucide"></i>
-                    <span>Reports</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
-                    <i data-lucide="settings" class="lucide"></i>
-                    <span>Settings</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
-                    <i data-lucide="log-out" class="lucide"></i>
-                    <span>Logout</span>
-                </a>
-            </nav>
-        </aside>
-
-        <!-- Main Dashboard Content -->
-        <main id="main-content" class="flex-grow p-6 md:p-10 transition-all duration-300 ease-in-out md:ml-64">
-            <!-- Sidebar Toggle Button for Mobile/Tablet -->
-            <button id="sidebar-toggle-button" class="md:hidden bg-runam-green text-white p-3 rounded-full shadow-lg fixed bottom-6 right-6 z-30 focus:outline-none focus:ring-2 focus:ring-runam-green focus:ring-opacity-75">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-
-            <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Admin Dashboard</h1>
-
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
-                <!-- Total Users Card -->
-                <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition-all hover:shadow-lg hover:scale-105">
-                    <div class="p-3 bg-runam-green rounded-full text-white">
-                        <i data-lucide="users" class="lucide w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Total Users</p>
-                        <p class="text-3xl font-bold text-runam-charcoal">1,250</p>
-                    </div>
-                </div>
-                <!-- Total Orders Card -->
-                <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition-all hover:shadow-lg hover:scale-105">
-                    <div class="p-3 bg-runam-yellow rounded-full text-runam-charcoal">
-                        <i data-lucide="package" class="lucide w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Total Orders</p>
-                        <p class="text-3xl font-bold text-runam-charcoal">5,890</p>
-                    </div>
-                </div>
-                <!-- Active Deliveries Card -->
-                <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition-all hover:shadow-lg hover:scale-105">
-                    <div class="p-3 bg-runam-charcoal rounded-full text-white">
-                        <i data-lucide="truck" class="lucide w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Active Deliveries</p>
-                        <p class="text-3xl font-bold text-runam-green">45</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Data Visualization Placeholders -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Orders Over Time Chart Placeholder -->
-                <section class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
-                        <i data-lucide="line-chart" class="lucide text-runam-green mr-3"></i> Orders Over Time
-                    </h2>
-                    <div class="h-64 bg-runam-light-grey rounded-lg flex items-center justify-center text-gray-500">
-                        [Placeholder for Line Chart: Orders per day/week]
-                    </div>
-                </section>
-
-                <!-- User Registration Trend Placeholder -->
-                <section class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
-                        <i data-lucide="trending-up" class="lucide text-runam-green mr-3"></i> User Registration Trend
-                    </h2>
-                    <div class="h-64 bg-runam-light-grey rounded-lg flex items-center justify-center text-gray-500">
-                        [Placeholder for Bar Chart: New users per month]
-                    </div>
-                </section>
-
-                <!-- Delivery Status Distribution Placeholder -->
-                <section class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
-                    <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
-                        <i data-lucide="pie-chart" class="lucide text-runam-green mr-3"></i> Delivery Status Distribution
-                    </h2>
-                    <div class="h-64 bg-runam-light-grey rounded-lg flex items-center justify-center text-gray-500">
-                        [Placeholder for Pie Chart: Pending, In-transit, Delivered]
-                    </div>
-                </section>
-            </div>
-        </main>
-    </div>
-
-    <!-- Footer Section (Consistent with other pages) -->
-    <footer class="bg-runam-charcoal text-runam-light-grey py-8 px-6 md:px-10 text-center z-20">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p class="text-sm">&copy; 2025 Runam Technologies. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">Privacy Policy</a>
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">Terms of Service</a>
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">FAQ</a>
-            </div>
-            <div class="flex space-x-4">
-                <!-- Social Media Icons (placeholders - using Lucide for consistency) -->
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
-                    <i data-lucide="facebook" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
-                </a>
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
-                    <i data-lucide="twitter" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
-                </a>
-                <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
-                    <i data-lucide="linkedin" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
-                </a>
-            </div>
-        </div>
-    </footer>
-
 </body>
 </html>
