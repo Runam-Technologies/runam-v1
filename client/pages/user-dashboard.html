@@ -66,6 +66,12 @@
             border-radius: 10px;
             border: 2px solid var(--color-runam-light-grey);
         }
+
+        /* Active link styling */
+        .sidebar-link.active {
+            background-color: var(--color-runam-green);
+            color: white;
+        }
     </style>
     <script>
         // Configure Tailwind CSS with custom colors
@@ -82,13 +88,20 @@
             },
         };
 
+        // Global state to store orders and user info
+        let orders = [];
+        let currentPage = 'dashboard';
+        const BASE_URL = 'https://runam-backend.onrender.com/';
+        const ORDER_TYPES = ['Website Development', 'Mobile App Development', 'SEO Optimization', 'Content Writing'];
+
         // JavaScript for mobile menu and sidebar toggle
         document.addEventListener('DOMContentLoaded', () => {
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
             const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
+            const mainContentArea = document.getElementById('main-content-area');
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
 
             // Toggle mobile navigation menu
             if (mobileMenuButton && mobileMenu) {
@@ -97,17 +110,504 @@
                 });
             }
 
-            // Toggle sidebar visibility on smaller screens
-            if (sidebarToggleButton && sidebar && mainContent) {
+            // Toggle sidebar visibility on smaller screens.
+            if (sidebarToggleButton && sidebar) {
                 sidebarToggleButton.addEventListener('click', () => {
-                    sidebar.classList.toggle('-translate-x-full'); // For mobile sidebar slide
-                    sidebar.classList.toggle('hidden'); // For desktop sidebar toggle
-                    mainContent.classList.toggle('md:ml-64'); // Adjust main content margin
+                    sidebar.classList.toggle('-translate-x-full');
                 });
             }
 
             // Initialize Lucide icons
             lucide.createIcons();
+
+            // --- Modals and their elements ---
+            const detailsModal = document.getElementById('details-modal');
+            const closeDetailsModalButton = document.getElementById('close-details-modal');
+            const detailsOrderIdSpan = document.getElementById('details-order-id');
+            const detailsOrderTypeSpan = document.getElementById('details-order-type');
+            const detailsOrderStatusSpan = document.getElementById('details-order-status');
+            const detailsOrderDescriptionP = document.getElementById('details-order-description');
+
+            const cancelModal = document.getElementById('cancel-modal');
+            const confirmCancelButton = document.getElementById('confirm-cancel-button');
+            const closeCancelModalButton = document.getElementById('close-cancel-modal');
+            let currentOrderIdToCancel = null;
+
+            const ratingModal = document.getElementById('rating-modal');
+            const submitRatingButton = document.getElementById('submit-rating-button');
+            const closeRatingModalButton = document.getElementById('close-rating-modal');
+            const starButtons = document.querySelectorAll('#rating-stars button');
+            const reviewTextarea = document.getElementById('review-textarea');
+            let currentOrderIdToRate = null;
+            let currentRating = 0;
+            
+            // --- Helper Functions ---
+            const showModal = (modal) => modal.classList.remove('hidden');
+            const hideModal = (modal) => modal.classList.add('hidden');
+
+            const getOrderStatusClasses = (status) => {
+                let statusColorClass = 'text-gray-600';
+                let statusBadgeClass = 'bg-gray-200 text-gray-800';
+                switch (status) {
+                    case 'pending':
+                        statusColorClass = 'text-runam-yellow';
+                        statusBadgeClass = 'bg-runam-yellow text-runam-charcoal';
+                        break;
+                    case 'approved':
+                        statusColorClass = 'text-blue-500';
+                        statusBadgeClass = 'bg-blue-100 text-blue-800';
+                        break;
+                    case 'in-transit':
+                        statusColorClass = 'text-purple-500';
+                        statusBadgeClass = 'bg-purple-100 text-purple-800';
+                        break;
+                    case 'completed':
+                        statusColorClass = 'text-runam-green';
+                        statusBadgeClass = 'bg-green-100 text-green-800';
+                        break;
+                    case 'cancelled':
+                        statusColorClass = 'text-red-500';
+                        statusBadgeClass = 'bg-red-100 text-red-800';
+                        break;
+                }
+                return { statusColorClass, statusBadgeClass };
+            };
+
+            const createOrderCardHtml = (order) => {
+                const { statusColorClass } = getOrderStatusClasses(order.order_status);
+                let actionsHtml = '';
+
+                if (order.order_status === 'pending') {
+                    actionsHtml = `
+                        <button class="flex items-center text-red-500 hover:text-red-700 transition-all text-sm font-medium cancel-button" data-order-id="${order.id}">
+                            <i data-lucide="x-circle" class="lucide w-4 h-4 mr-1"></i> Cancel
+                        </button>
+                    `;
+                } else if (order.order_status === 'completed' && !order.rated) {
+                    actionsHtml = `
+                        <button class="flex items-center text-runam-green hover:text-runam-charcoal transition-all text-sm font-medium rate-button" data-order-id="${order.id}">
+                            <i data-lucide="star" class="lucide w-4 h-4 mr-1"></i> Rate
+                        </button>
+                    `;
+                } else if (order.order_status === 'completed' && order.rated) {
+                    actionsHtml = `
+                        <p class="flex items-center text-gray-500 text-xs italic">
+                            <i data-lucide="check" class="lucide w-4 h-4 mr-1"></i> Rating submitted
+                        </p>
+                    `;
+                }
+
+                return `
+                    <div class="bg-runam-light-grey p-4 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center transition-all duration-200 hover:shadow-md cursor-pointer">
+                        <div class="flex-grow mb-2 sm:mb-0 details-button" data-order-id="${order.id}">
+                            <p class="font-medium text-runam-charcoal">Order #RUNAM${order.id.toString().padStart(3, '0')}</p>
+                            <p class="text-sm text-gray-600">Status: <span class="${statusColorClass} font-semibold">${order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}</span></p>
+                            <p class="text-xs text-gray-500">Created: ${order['created at']}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                           ${actionsHtml}
+                            <button class="text-runam-green hover:text-runam-charcoal transition-all details-button" data-order-id="${order.id}">
+                                <i data-lucide="chevron-right" class="lucide"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            };
+
+            const renderDashboard = () => {
+                const activeOrders = orders.filter(order => order.order_status !== 'completed' && order.order_status !== 'cancelled');
+                const recentDeliveries = orders.filter(order => order.order_status === 'completed' || order.order_status === 'cancelled');
+
+                let activeOrdersHtml = activeOrders.length > 0 ? activeOrders.map(createOrderCardHtml).join('') : '<p class="text-center text-gray-500 text-sm mt-4">You have no active orders.</p>';
+                let recentDeliveriesHtml = recentDeliveries.length > 0 ? recentDeliveries.map(createOrderCardHtml).join('') : '<p class="text-center text-gray-500 text-sm mt-4">You have no recent deliveries.</p>';
+
+                mainContentArea.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Welcome, User!</h1>
+                    <div class="mb-10 text-center">
+                        <button onclick="renderPage('create-order')" class="bg-runam-green text-white font-bold py-4 px-8 rounded-xl text-lg
+                                        hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl
+                                        focus:outline-none focus:ring-4 focus:ring-runam-green focus:ring-opacity-50">
+                            <i data-lucide="plus" class="lucide inline-block align-middle mr-3 w-6 h-6"></i>
+                            Create New Order
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <section class="bg-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
+                                <i data-lucide="package" class="lucide text-runam-green mr-3"></i> Active Orders
+                            </h2>
+                            <div id="active-orders-container" class="space-y-4">
+                                ${activeOrdersHtml}
+                            </div>
+                        </section>
+                        <section class="bg-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
+                                <i data-lucide="check-circle" class="lucide text-runam-green mr-3"></i> Recent Deliveries
+                            </h2>
+                            <div id="recent-deliveries-container" class="space-y-4">
+                                ${recentDeliveriesHtml}
+                            </div>
+                        </section>
+                    </div>
+                `;
+                lucide.createIcons();
+                attachEventListeners();
+            };
+            
+            const renderCreateOrderForm = () => {
+                const orderOptions = ORDER_TYPES.map(type => `<option value="${type}">${type}</option>`).join('');
+
+                mainContentArea.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Create New Order</h1>
+                    <div class="bg-white p-6 rounded-xl shadow-md max-w-2xl mx-auto">
+                        <form id="create-order-form" class="space-y-6">
+                            <div>
+                                <label for="order-type" class="block text-sm font-medium text-gray-700">Order Type</label>
+                                <select id="order-type" name="order_type" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-runam-green focus:border-runam-green sm:text-sm">
+                                    <option value="" disabled selected>Select an order type</option>
+                                    ${orderOptions}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="order-description" class="block text-sm font-medium text-gray-700">Order Description</label>
+                                <textarea id="order-description" name="order_description" rows="5" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-runam-green focus:border-runam-green sm:text-sm resize-none" placeholder="Provide a detailed description of your project..."></textarea>
+                            </div>
+                            <div id="status-message" class="text-center font-medium"></div>
+                            <div>
+                                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-runam-green hover:bg-opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-runam-green">
+                                    Place Order
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                
+                document.getElementById('create-order-form').addEventListener('submit', handlePlaceOrder);
+            };
+
+            const renderOrderHistory = () => {
+                const completedOrdersHtml = orders
+                    .filter(order => order.order_status === 'completed' || order.order_status === 'cancelled')
+                    .map(createOrderCardHtml)
+                    .join('');
+
+                mainContentArea.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Order History</h1>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-2xl font-semibold text-runam-charcoal mb-6">Completed & Cancelled Orders</h2>
+                        <div id="order-history-container" class="space-y-4">
+                            ${completedOrdersHtml || '<p class="text-center text-gray-500 text-sm mt-4">No order history available.</p>'}
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+                attachEventListeners();
+            };
+
+            const renderProfile = () => {
+                mainContentArea.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Profile</h1>
+                    <div class="bg-white p-6 rounded-xl shadow-md max-w-2xl mx-auto text-center">
+                        <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-runam-light-grey mb-4">
+                            <i data-lucide="user-circle" class="lucide w-16 h-16 text-gray-500"></i>
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-900">John Doe</h2>
+                        <p class="text-gray-500">john@example.com</p>
+                        <div class="mt-6 text-left space-y-4">
+                            <p class="text-gray-700"><span class="font-medium">Location:</span> Lagos</p>
+                            <p class="text-gray-700"><span class="font-medium">Phone:</span> 09012345678</p>
+                            <div class="flex justify-center mt-6">
+                                <button class="px-4 py-2 bg-runam-green text-white font-medium rounded-md hover:bg-opacity-90 transition-all">
+                                    Edit Profile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            };
+
+            const renderSettings = () => {
+                mainContentArea.innerHTML = `
+                    <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Settings</h1>
+                    <div class="bg-white p-6 rounded-xl shadow-md max-w-2xl mx-auto">
+                        <div class="space-y-6">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900 mb-2">Account Preferences</h2>
+                                <p class="text-gray-500">Manage your account settings and preferences.</p>
+                                <button class="mt-4 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-all">
+                                    Change Password
+                                </button>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900 mb-2">Notifications</h2>
+                                <p class="text-gray-500">Control how you receive notifications.</p>
+                                <label class="inline-flex items-center mt-3">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-runam-green rounded-md focus:ring-0">
+                                    <span class="ml-2 text-gray-700">Email notifications</span>
+                                </label>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900 mb-2">Theme</h2>
+                                <p class="text-gray-500">Choose your preferred dashboard theme.</p>
+                                <select class="mt-4 block w-full max-w-xs px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-runam-green focus:border-runam-green sm:text-sm">
+                                    <option>Light</option>
+                                    <option>Dark</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+            
+            // Main rendering function to switch between pages
+            window.renderPage = (pageName) => {
+                currentPage = pageName;
+                sidebar.classList.add('-translate-x-full'); // Hide sidebar on mobile after click
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const newActiveLink = document.querySelector(`.sidebar-link[data-page="${pageName}"]`);
+                if (newActiveLink) {
+                    newActiveLink.classList.add('active');
+                }
+
+                switch (pageName) {
+                    case 'dashboard':
+                        renderDashboard();
+                        break;
+                    case 'create-order':
+                        renderCreateOrderForm();
+                        break;
+                    case 'order-history':
+                        renderOrderHistory();
+                        break;
+                    case 'profile':
+                        renderProfile();
+                        break;
+                    case 'settings':
+                        renderSettings();
+                        break;
+                    default:
+                        renderDashboard();
+                }
+            };
+
+            // This function handles the "Place Order" form submission.
+            const handlePlaceOrder = async (e) => {
+                e.preventDefault();
+                const statusMessage = document.getElementById('status-message');
+                statusMessage.textContent = 'Placing your order...';
+                statusMessage.classList.remove('text-red-500');
+                statusMessage.classList.add('text-runam-green');
+
+                const orderType = document.getElementById('order-type').value;
+                const orderDescription = document.getElementById('order-description').value;
+
+                if (!orderType || !orderDescription) {
+                    statusMessage.textContent = 'Please fill in all fields.';
+                    statusMessage.classList.remove('text-runam-green');
+                    statusMessage.classList.add('text-red-500');
+                    return;
+                }
+
+                const payload = {
+                    order_type: orderType,
+                    order_description: orderDescription
+                };
+
+                try {
+                    const response = await fetch(`${BASE_URL}user/place-order.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        statusMessage.textContent = 'Order placed successfully!';
+                        statusMessage.classList.remove('text-red-500');
+                        statusMessage.classList.add('text-runam-green');
+                        // Refresh data and go back to the dashboard
+                        await fetchAndRenderUserOrders();
+                        renderPage('dashboard');
+                    } else {
+                        throw new Error(result.message || 'Failed to place order.');
+                    }
+                } catch (error) {
+                    console.error('Error placing order:', error);
+                    statusMessage.textContent = `Error: ${error.message}`;
+                    statusMessage.classList.remove('text-runam-green');
+                    statusMessage.classList.add('text-red-500');
+                }
+            };
+
+
+            // This function will simulate an API call to cancel an order.
+            const handleCancelOrder = async (orderId) => {
+                console.log(`Simulating API call to cancel order: ${orderId}`);
+                // In a real application, this would be a fetch call to a backend API.
+                // e.g., await fetch(`${BASE_URL}cancel-order.php`, { method: 'POST', body: JSON.stringify({ order_id: orderId }) });
+                
+                // Simulate network latency
+                return new Promise(resolve => setTimeout(() => {
+                    const status = 'success'; // Simulate success
+                    if (status === 'success') {
+                        console.log(`Order ${orderId} successfully cancelled.`);
+                        fetchAndRenderUserOrders();
+                    } else {
+                        console.error(`Failed to cancel order ${orderId}.`);
+                    }
+                    resolve();
+                }, 1000));
+            };
+
+            // This function will simulate an API call to submit a rating.
+            const handleSubmitRating = async (orderId, rating, review) => {
+                console.log(`Simulating API call to submit rating for order: ${orderId} - Rating: ${rating}, Review: "${review}"`);
+                // In a real application, this would be a fetch call to a backend API.
+                // e.g., await fetch(`${BASE_URL}rate-order.php`, { method: 'POST', body: JSON.stringify({ order_id: orderId, rating, review }) });
+
+                // Simulate network latency
+                return new Promise(resolve => setTimeout(() => {
+                    const status = 'success'; // Simulate success
+                    if (status === 'success') {
+                        console.log(`Rating for order ${orderId} successfully submitted.`);
+                        fetchAndRenderUserOrders();
+                    } else {
+                        console.error(`Failed to submit rating for order ${orderId}.`);
+                    }
+                    resolve();
+                }, 1000));
+            };
+            
+            // This function handles the logout logic
+            window.handleLogout = async () => {
+                try {
+                    const response = await fetch(`${BASE_URL}auth/logout.php`);
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        console.log('User logged out successfully.');
+                        window.location.href = 'index.html'; // Redirect to the login/home page
+                    } else {
+                        throw new Error(result.message || 'Logout failed.');
+                    }
+                } catch (error) {
+                    console.error('Error during logout:', error);
+                    // Even if the API call fails, we should probably redirect the user
+                    // to prevent them from being stuck.
+                    window.location.href = 'index.html';
+                }
+            };
+            
+            // Function to attach event listeners to dynamically rendered content
+            const attachEventListeners = () => {
+                // Attach event listeners for the details modal
+                document.querySelectorAll('.details-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const orderId = parseInt(button.dataset.orderId);
+                        const order = orders.find(o => o.id === orderId);
+                        
+                        if (order) {
+                            detailsOrderIdSpan.textContent = `#RUNAM${order.id.toString().padStart(3, '0')}`;
+                            detailsOrderTypeSpan.textContent = order.order_type;
+                            detailsOrderStatusSpan.textContent = order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1);
+                            detailsOrderDescriptionP.textContent = order.order_description;
+                            showModal(detailsModal);
+                        }
+                    });
+                });
+
+                // Attach event listeners for the cancel button
+                document.querySelectorAll('.cancel-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        currentOrderIdToCancel = parseInt(e.currentTarget.dataset.orderId);
+                        showModal(cancelModal);
+                    });
+                });
+                
+                // Attach event listeners for the rating button
+                document.querySelectorAll('.rate-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        currentOrderIdToRate = parseInt(e.currentTarget.dataset.orderId);
+                        showModal(ratingModal);
+                    });
+                });
+            };
+
+            // Function to fetch and render user orders
+            const fetchAndRenderUserOrders = async () => {
+                try {
+                    const response = await fetch(`${BASE_URL}user/my-orders.php`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        // The `rated` property is not in the original API doc, so we'll add it for simulation purposes
+                        // to show which orders have been rated. In a real app, this would come from the backend.
+                        orders = result.orders.map(order => ({
+                            ...order,
+                            rated: Math.random() > 0.5 // Simulate some orders as already rated
+                        }));
+                        renderPage(currentPage);
+                    } else {
+                        throw new Error(result.message || 'Failed to fetch user orders.');
+                    }
+                } catch (error) {
+                    console.error('Error fetching orders:', error);
+                    mainContentArea.innerHTML = '<p class="text-center text-sm text-red-500">Error fetching orders. Please try again later.</p>';
+                }
+            };
+
+            // --- Modal Event Listeners ---
+            closeDetailsModalButton.addEventListener('click', () => hideModal(detailsModal));
+            closeCancelModalButton.addEventListener('click', () => hideModal(cancelModal));
+            confirmCancelButton.addEventListener('click', async () => {
+                hideModal(cancelModal);
+                if (currentOrderIdToCancel) {
+                    const orderCard = document.querySelector(`.cancel-button[data-order-id="${currentOrderIdToCancel}"]`).closest('.shadow-sm');
+                    orderCard.innerHTML = '<p class="text-center text-gray-500 text-sm p-4">Cancelling order...</p>';
+                    await handleCancelOrder(currentOrderIdToCancel);
+                }
+            });
+
+            closeRatingModalButton.addEventListener('click', () => {
+                hideModal(ratingModal);
+                // Reset rating form
+                currentRating = 0;
+                reviewTextarea.value = '';
+                starButtons.forEach(btn => btn.classList.remove('text-runam-yellow'));
+            });
+
+            starButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    currentRating = parseInt(e.currentTarget.dataset.rating);
+                    starButtons.forEach(btn => {
+                        btn.classList.remove('text-runam-yellow');
+                        if (parseInt(btn.dataset.rating) <= currentRating) {
+                            btn.classList.add('text-runam-yellow');
+                        }
+                    });
+                });
+            });
+
+            submitRatingButton.addEventListener('click', async () => {
+                hideModal(ratingModal);
+                if (currentOrderIdToRate && currentRating > 0) {
+                    const orderCard = document.querySelector(`.rate-button[data-order-id="${currentOrderIdToRate}"]`).closest('.shadow-sm');
+                    orderCard.innerHTML = '<p class="text-center text-gray-500 text-sm p-4">Submitting rating...</p>';
+                    await handleSubmitRating(currentOrderIdToRate, currentRating, reviewTextarea.value);
+                    currentRating = 0;
+                    reviewTextarea.value = '';
+                    starButtons.forEach(btn => btn.classList.remove('text-runam-yellow'));
+                } else {
+                    console.error('Rating not selected or order ID is missing.');
+                }
+            });
+
+            // Initial fetch of orders when the page loads
+            fetchAndRenderUserOrders();
         });
     </script>
 </head>
@@ -120,15 +620,14 @@
              <img src="../assets/images/runam-logo.png" class="w-40"/>
         </div>
 
-        <!-- Mobil
-         e Menu Button (Hamburger) -->
+        <!-- Mobile Menu Button (Hamburger) -->
         <button id="mobile-menu-button" class="md:hidden text-runam-charcoal focus:outline-none">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
         </button>
 
-        <!-- Desktop Navigation Links (Optional, can be removed if sidebar is primary) -->
+        <!-- Desktop Navigation Links -->
         <nav class="hidden md:flex space-x-8">
             <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">Home</a>
             <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all">About Us</a>
@@ -136,7 +635,7 @@
             <a href="#" class="text-runam-green font-medium transition-all">Dashboard</a>
         </nav>
 
-        <!-- Mobile Navigation Menu (Hidden by default, toggled by button) -->
+        <!-- Mobile Navigation Menu -->
         <nav id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 flex flex-col items-center space-y-4">
             <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Home</a>
             <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">How it Works</a>
@@ -151,127 +650,124 @@
     <div class="flex flex-1">
         <!-- Sidebar -->
         <aside id="sidebar" class="bg-runam-charcoal text-runam-light-grey w-64 p-6 space-y-6 flex-shrink-0
-                                   transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out
-                                   md:relative fixed inset-y-0 left-0 z-10 overflow-y-auto sidebar-scroll">
+                                 fixed inset-y-0 left-0 z-10 transform -translate-x-full md:static md:translate-x-0
+                                 transition-transform duration-300 ease-in-out overflow-y-auto sidebar-scroll">
             <div class="text-xl font-semibold mb-8">User Menu</div>
             <nav class="space-y-3">
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all text-white">
+                <button class="sidebar-link active flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all text-white w-full text-left" onclick="renderPage('dashboard')" data-page="dashboard">
                     <i data-lucide="layout-dashboard" class="lucide"></i>
                     <span>Dashboard</span>
-                </a>
-                <a href="create-order.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                </button>
+                <button class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all w-full text-left" onclick="renderPage('create-order')" data-page="create-order">
                     <i data-lucide="plus-circle" class="lucide"></i>
                     <span>Create New Order</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                </button>
+                <button class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all w-full text-left" onclick="renderPage('order-history')" data-page="order-history">
                     <i data-lucide="history" class="lucide"></i>
                     <span>Order History</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                </button>
+                <button class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all w-full text-left" onclick="renderPage('profile')" data-page="profile">
                     <i data-lucide="user-circle" class="lucide"></i>
                     <span>Profile</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                </button>
+                <button class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all w-full text-left" onclick="renderPage('settings')" data-page="settings">
                     <i data-lucide="settings" class="lucide"></i>
                     <span>Settings</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
+                </button>
+                <button class="sidebar-link flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all w-full text-left" onclick="handleLogout()">
                     <i data-lucide="log-out" class="lucide"></i>
                     <span>Logout</span>
-                </a>
+                </button>
             </nav>
         </aside>
 
         <!-- Main Dashboard Content -->
-        <main id="main-content" class="flex-grow p-6 md:p-10 transition-all duration-300 ease-in-out md:ml-0">
-            <!-- Sidebar Toggle Button for Mobile/Tablet -->
-            <button id="sidebar-toggle-button" class="md:hidden bg-runam-green text-white p-3 rounded-full shadow-lg fixed bottom-6 right-6 z-30 focus:outline-none focus:ring-2 focus:ring-runam-green focus:ring-opacity-75">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-
-            <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Welcome, User!</h1>
-
-            <!-- Create New Order Button -->
-            <div class="mb-10 text-center">
-                <a href="create-order.html" class="bg-runam-green text-white font-bold py-4 px-8 rounded-xl text-lg
-                               hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl
-                               focus:outline-none focus:ring-4 focus:ring-runam-green focus:ring-opacity-50">
-                    <i data-lucide="plus" class="lucide inline-block align-middle mr-3 w-6 h-6"></i>
-                    Create New Order
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Active Orders Section -->
-                <section class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
-                        <i data-lucide="package" class="lucide text-runam-green mr-3"></i> Active Orders
-                    </h2>
-                    <div class="space-y-4">
-                        <!-- Order Card 1 -->
-                        <div class="bg-runam-light-grey p-4 rounded-lg shadow-sm flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-runam-charcoal">Order #RUNAM001</p>
-                                <p class="text-sm text-gray-600">Status: <span class="text-runam-yellow font-semibold">Pending Pickup</span></p>
-                                <p class="text-xs text-gray-500">Estimated Delivery: 15 mins</p>
-                            </div>
-                            <button class="text-runam-green hover:text-runam-charcoal transition-all">
-                                <i data-lucide="chevron-right" class="lucide"></i>
-                            </button>
-                        </div>
-                        <!-- Order Card 2 -->
-                        <div class="bg-runam-light-grey p-4 rounded-lg shadow-sm flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-runam-charcoal">Order #RUNAM002</p>
-                                <p class="text-sm text-gray-600">Status: <span class="text-runam-green font-semibold">In Transit</span></p>
-                                <p class="text-xs text-gray-500">Estimated Delivery: 5 mins</p>
-                            </div>
-                            <button class="text-runam-green hover:text-runam-charcoal transition-all">
-                                <i data-lucide="chevron-right" class="lucide"></i>
-                            </button>
-                        </div>
-                        <p class="text-center text-gray-500 text-sm mt-4">No more active orders.</p>
-                    </div>
-                </section>
-
-                <!-- Recent Deliveries Section -->
-                <section class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-2xl font-semibold text-runam-charcoal mb-6 flex items-center">
-                        <i data-lucide="check-circle" class="lucide text-runam-green mr-3"></i> Recent Deliveries
-                    </h2>
-                    <div class="space-y-4">
-                        <!-- Delivery Card 1 -->
-                        <div class="bg-runam-light-grey p-4 rounded-lg shadow-sm flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-runam-charcoal">Order #RUNAM000</p>
-                                <p class="text-sm text-gray-600">Delivered: 1 hour ago</p>
-                                <p class="text-xs text-gray-500">From: Campus Eatery</p>
-                            </div>
-                            <button class="text-runam-green hover:text-runam-charcoal transition-all">
-                                <i data-lucide="chevron-right" class="lucide"></i>
-                            </button>
-                        </div>
-                        <!-- Delivery Card 2 -->
-                        <div class="bg-runam-light-grey p-4 rounded-lg shadow-sm flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-runam-charcoal">Order #RUNAM999</p>
-                                <p class="text-sm text-gray-600">Delivered: Yesterday</p>
-                                <p class="text-xs text-gray-500">From: Campus Bookstore</p>
-                            </div>
-                            <button class="text-runam-green hover:text-runam-charcoal transition-all">
-                                <i data-lucide="chevron-right" class="lucide"></i>
-                            </button>
-                        </div>
-                        <p class="text-center text-gray-500 text-sm mt-4">View <a href="#" class="text-runam-green hover:underline">all order history</a></p>
-                    </div>
-                </section>
-            </div>
+        <main id="main-content-area" class="flex-grow p-6 md:p-10 transition-all duration-300 ease-in-out md:ml-64">
+            <!-- Dynamic content will be loaded here -->
         </main>
     </div>
 
-    <!-- Footer Section (Consistent with other pages) -->
+    <!-- Sidebar Toggle Button for Mobile/Tablet -->
+    <button id="sidebar-toggle-button" class="md:hidden bg-runam-green text-white p-3 rounded-full shadow-lg fixed bottom-6 right-6 z-30 focus:outline-none focus:ring-2 focus:ring-runam-green focus:ring-opacity-75">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+    
+    <!-- Order Details Modal -->
+    <div id="details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-left">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Order Details <span id="details-order-id" class="text-runam-green"></span></h3>
+                <div class="mt-2 text-gray-700">
+                    <p class="mb-2"><strong>Order Type:</strong> <span id="details-order-type"></span></p>
+                    <p class="mb-2"><strong>Status:</strong> <span id="details-order-status"></span></p>
+                    <div class="bg-gray-100 p-4 rounded-lg mt-4">
+                        <p class="font-semibold text-gray-900 mb-2">Description:</p>
+                        <p id="details-order-description" class="text-sm text-gray-600"></p>
+                    </div>
+                </div>
+                <div class="mt-5 flex justify-end">
+                    <button id="close-details-modal" class="px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-md hover:bg-gray-300 transition-all">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Order Confirmation Modal -->
+    <div id="cancel-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-sm shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <i data-lucide="alert-triangle" class="lucide w-6 h-6 text-red-600"></i>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Cancel Order</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">Are you sure you want to cancel this order? This action cannot be undone.</p>
+                </div>
+                <div class="items-center px-4 py-3 sm:flex sm:flex-row-reverse">
+                    <button id="confirm-cancel-button" class="w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:text-sm transition-all">
+                        Yes, Cancel
+                    </button>
+                    <button id="close-cancel-modal" class="mt-3 w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:text-sm transition-all">
+                        No, Keep it
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div id="rating-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Rate Your Delivery</h3>
+                <p class="text-gray-600 mb-4">How was your experience with this order?</p>
+                <div class="flex justify-center space-x-2 my-4" id="rating-stars">
+                    <button class="text-gray-300 hover:text-runam-yellow focus:outline-none transition-all" data-rating="1"><i data-lucide="star" class="lucide w-8 h-8"></i></button>
+                    <button class="text-gray-300 hover:text-runam-yellow focus:outline-none transition-all" data-rating="2"><i data-lucide="star" class="lucide w-8 h-8"></i></button>
+                    <button class="text-gray-300 hover:text-runam-yellow focus:outline-none transition-all" data-rating="3"><i data-lucide="star" class="lucide w-8 h-8"></i></button>
+                    <button class="text-gray-300 hover:text-runam-yellow focus:outline-none transition-all" data-rating="4"><i data-lucide="star" class="lucide w-8 h-8"></i></button>
+                    <button class="text-gray-300 hover:text-runam-yellow focus:outline-none transition-all" data-rating="5"><i data-lucide="star" class="lucide w-8 h-8"></i></button>
+                </div>
+                <div class="mt-4">
+                    <textarea id="review-textarea" class="w-full p-3 border rounded-md resize-none focus:ring-runam-green focus:border-runam-green focus:outline-none" rows="4" placeholder="Share your feedback..."></textarea>
+                </div>
+                <div class="mt-5 flex justify-end space-x-2">
+                    <button id="close-rating-modal" class="px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-md hover:bg-gray-300 transition-all">
+                        Cancel
+                    </button>
+                    <button id="submit-rating-button" class="px-4 py-2 bg-runam-green text-white text-base font-medium rounded-md hover:bg-opacity-90 transition-all">
+                        Submit Rating
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
     <footer class="bg-runam-charcoal text-runam-light-grey py-8 px-6 md:px-10 text-center z-20">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p class="text-sm">&copy; 2025 Runam Technologies. All rights reserved.</p>
@@ -281,7 +777,6 @@
                 <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all text-sm">FAQ</a>
             </div>
             <div class="flex space-x-4">
-                <!-- Social Media Icons (placeholders - using Lucide for consistency) -->
                 <a href="#" class="text-runam-light-grey hover:text-runam-green transition-all">
                     <i data-lucide="facebook" class="lucide w-6 h-6" style="stroke: currentColor;"></i>
                 </a>

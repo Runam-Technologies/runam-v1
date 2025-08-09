@@ -67,61 +67,17 @@
             border: 2px solid var(--color-runam-light-grey);
         }
     </style>
-    <script>
-        // Configure Tailwind CSS with custom colors
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'runam-green': '#2CBA76',
-                        'runam-yellow': '#FFD700',
-                        'runam-light-grey': '#F5F5F5',
-                        'runam-charcoal': '#333333',
-                    },
-                },
-            },
-        };
-
-        // JavaScript for mobile menu and sidebar toggle
-        document.addEventListener('DOMContentLoaded', () => {
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-
-            // Toggle mobile navigation menu
-            if (mobileMenuButton && mobileMenu) {
-                mobileMenuButton.addEventListener('click', () => {
-                    mobileMenu.classList.toggle('hidden');
-                });
-            }
-
-            // Toggle sidebar visibility on smaller screens
-            if (sidebarToggleButton && sidebar && mainContent) {
-                sidebarToggleButton.addEventListener('click', () => {
-                    sidebar.classList.toggle('-translate-x-full'); // For mobile sidebar slide
-                    sidebar.classList.toggle('hidden'); // For desktop sidebar toggle
-                    // Adjust main content margin only if sidebar is visible on desktop
-                    if (window.innerWidth >= 768) { // md breakpoint
-                        mainContent.classList.toggle('md:ml-64');
-                    }
-                });
-            }
-
-            // Initialize Lucide icons
-            lucide.createIcons();
-        });
-    </script>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- Header Section (Top Navbar - Consistent with other pages) -->
     <header class="bg-white shadow-md py-4 px-6 md:px-10 flex justify-between items-center relative z-20">
         <!-- Logo -->
-        <div>
-             <img src="../assets/images/runam-logo.png" class="w-40"/>
-        </div>
+        <a href="index.html" class="flex items-center space-x-2">
+            <div>
+                <img src="../assets/images/runam-logo.png" class="w-40"/>
+            </div>
+        </a>
 
         <!-- Mobile Menu Button (Hamburger) -->
         <button id="mobile-menu-button" class="md:hidden text-runam-charcoal focus:outline-none">
@@ -142,11 +98,9 @@
         <!-- Mobile Navigation Menu (Hidden by default, toggled by button) -->
         <nav id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 flex flex-col items-center space-y-4">
             <a href="index.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Home</a>
-            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">How it Works</a>
-            <a href="#" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Services</a>
             <a href="about.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">About Us</a>
             <a href="contact.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Contact</a>
-            <a href="dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">User Dashboard</a>
+            <a href="user-dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">User Dashboard</a>
             <a href="admin-dashboard.html" class="text-runam-charcoal hover:text-runam-green font-medium transition-all w-full text-center py-2">Admin Dashboard</a>
         </nav>
     </header>
@@ -155,8 +109,8 @@
     <div class="flex flex-1">
         <!-- Sidebar (Admin Sidebar - Consistent with Admin Dashboard) -->
         <aside id="sidebar" class="bg-runam-charcoal text-runam-light-grey w-64 p-6 space-y-6 flex-shrink-0
-                                   transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out
-                                   md:relative fixed inset-y-0 left-0 z-10 overflow-y-auto sidebar-scroll">
+                                 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out
+                                 md:relative fixed inset-y-0 left-0 z-10 overflow-y-auto sidebar-scroll">
             <div class="text-xl font-semibold mb-8">Admin Menu</div>
             <nav class="space-y-3">
                 <a href="admin-dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-runam-green hover:text-white transition-all">
@@ -201,25 +155,25 @@
 
             <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Order Management</h1>
 
-            <!-- Search and Filter Bar (Optional) -->
+            <!-- Search and Filter Bar -->
             <div class="bg-white p-6 rounded-xl shadow-md mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <div class="relative w-full sm:w-1/2">
-                    <input type="text" placeholder="Search by Order ID or Customer Name..."
-                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all">
+                    <input type="text" id="search-input" placeholder="Search by Order ID or Customer Name..."
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all">
                     <i data-lucide="search" class="lucide absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 </div>
                 <div class="relative w-full sm:w-1/4">
-                    <select class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all">
+                    <select id="status-filter" class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all">
                         <option value="">Filter by Status</option>
                         <option value="pending">Pending</option>
-                        <option value="assigned">Assigned</option>
+                        <option value="approved">Approved</option>
                         <option value="in-transit">In Transit</option>
-                        <option value="delivered">Delivered</option>
+                        <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                     </select>
                     <i data-lucide="chevron-down" class="lucide absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                 </div>
-                <button class="w-full sm:w-auto bg-runam-green text-white font-semibold py-2 px-6 rounded-lg hover:bg-opacity-90 transition-all shadow-md">
+                <button id="apply-filters-button" class="w-full sm:w-auto bg-runam-green text-white font-semibold py-2 px-6 rounded-lg hover:bg-opacity-90 transition-all shadow-md">
                     Apply Filters
                 </button>
             </div>
@@ -232,91 +186,114 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">Order ID</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Sample Order Row 1 -->
+                    <tbody id="orders-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Orders will be dynamically inserted here by JavaScript -->
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-runam-charcoal">#RUNAM001</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Alice Johnson</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-runam-yellow text-runam-charcoal">Pending</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <button class="text-runam-green hover:text-runam-charcoal transition-all" title="Edit Order">
-                                    <i data-lucide="edit" class="lucide"></i>
-                                </button>
-                                <button class="text-blue-500 hover:text-blue-700 transition-all" title="Assign Rider">
-                                    <i data-lucide="user-plus" class="lucide"></i>
-                                </button>
-                                <button class="text-red-500 hover:text-red-700 transition-all" title="Mark Delivered">
-                                    <i data-lucide="check-circle" class="lucide"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <!-- Sample Order Row 2 -->
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-runam-charcoal">#RUNAM002</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Bob Williams</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Assigned</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <button class="text-runam-green hover:text-runam-charcoal transition-all" title="Edit Order">
-                                    <i data-lucide="edit" class="lucide"></i>
-                                </button>
-                                <button class="text-blue-500 hover:text-blue-700 transition-all" title="Assign Rider">
-                                    <i data-lucide="user-plus" class="lucide"></i>
-                                </button>
-                                <button class="text-red-500 hover:text-red-700 transition-all" title="Mark Delivered">
-                                    <i data-lucide="check-circle" class="lucide"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <!-- Sample Order Row 3 -->
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-runam-charcoal">#RUNAM003</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Charlie Davis</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Delivered</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <button class="text-runam-green hover:text-runam-charcoal transition-all" title="Edit Order">
-                                    <i data-lucide="edit" class="lucide"></i>
-                                </button>
-                                <button class="text-blue-500 hover:text-blue-700 transition-all" title="Assign Rider">
-                                    <i data-lucide="user-plus" class="lucide"></i>
-                                </button>
-                                <button class="text-red-500 hover:text-red-700 transition-all" title="Mark Delivered">
-                                    <i data-lucide="check-circle" class="lucide"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <!-- Sample Order Row 4 -->
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-runam-charcoal">#RUNAM004</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Diana Prince</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">In Transit</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <button class="text-runam-green hover:text-runam-charcoal transition-all" title="Edit Order">
-                                    <i data-lucide="edit" class="lucide"></i>
-                                </button>
-                                <button class="text-blue-500 hover:text-blue-700 transition-all" title="Assign Rider">
-                                    <i data-lucide="user-plus" class="lucide"></i>
-                                </button>
-                                <button class="text-red-500 hover:text-red-700 transition-all" title="Mark Delivered">
-                                    <i data-lucide="check-circle" class="lucide"></i>
-                                </button>
-                            </td>
+                            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Loading orders...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
+    
+    <!-- Modals -->
+    <!-- Status Update Modal -->
+    <div id="status-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Update Order Status</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500 mb-4">Select a new status for order <span id="modal-order-id" class="font-bold"></span>.</p>
+                    <select id="modal-status-select" class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all">
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="in-transit">In Transit</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="update-status-button" class="px-4 py-2 bg-runam-green text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-green-300 transition-all">
+                        Update
+                    </button>
+                    <button id="close-status-modal" class="mt-2 px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Confirm Deletion</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">Are you sure you want to delete order <span id="delete-order-id" class="font-bold"></span>? This action cannot be undone.</p>
+                </div>
+                <div class="items-center px-4 py-3 space-y-2">
+                    <button id="confirm-delete-button" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 transition-all">
+                        Delete
+                    </button>
+                    <button id="cancel-delete-button" class="px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-left">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Order Details <span id="details-order-id" class="text-runam-green"></span></h3>
+                <div class="mt-2 text-gray-700">
+                    <p class="mb-2"><strong>Order Type:</strong> <span id="details-order-type"></span></p>
+                    <p class="mb-2"><strong>Status:</strong> <span id="details-order-status"></span></p>
+                    <div class="bg-gray-100 p-4 rounded-lg mt-4">
+                        <p class="font-semibold text-gray-900 mb-2">Description:</p>
+                        <p id="details-order-description" class="text-sm text-gray-600"></p>
+                    </div>
+                </div>
+                <div class="mt-5 flex justify-end">
+                    <button id="close-details-modal" class="px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-md hover:bg-gray-300 transition-all">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Rider Modal -->
+    <div id="assign-rider-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Assign Rider</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500 mb-4">Assign a rider for order <span id="assign-rider-order-id" class="font-bold"></span>.</p>
+                    <select id="rider-select" class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all">
+                        <!-- Rider options will be populated here -->
+                    </select>
+                </div>
+                <div class="items-center px-4 py-3 space-y-2">
+                    <button id="assign-rider-button" class="px-4 py-2 bg-runam-green text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-green-300 transition-all">
+                        Assign
+                    </button>
+                    <button id="cancel-assign-rider" class="px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Footer Section (Consistent with other pages) -->
     <footer class="bg-runam-charcoal text-runam-light-grey py-8 px-6 md:px-10 text-center z-20">
@@ -342,5 +319,380 @@
         </div>
     </footer>
 
+    <script>
+        // Configure Tailwind CSS with custom colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'runam-green': '#2CBA76',
+                        'runam-yellow': '#FFD700',
+                        'runam-light-grey': '#F5F5F5',
+                        'runam-charcoal': '#333333',
+                    },
+                },
+            },
+        };
+
+        // Base URL for the APIs
+        const BASE_URL = 'https://runam-backend.onrender.com/';
+
+        // Mock data
+        const MOCK_CUSTOMERS = {
+            1: "Alice Johnson",
+            2: "Bob Williams",
+            3: "Charlie Davis",
+            4: "Diana Prince",
+            5: "Bruce Wayne",
+            6: "Clark Kent",
+            7: "Lois Lane",
+            8: "Lex Luthor",
+        };
+
+        const MOCK_RIDERS = [
+            { id: 101, name: "Samuel Okoro" },
+            { id: 102, name: "Fatima Adebayo" },
+            { id: 103, name: "Chidi Nnamdi" },
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+
+            const ordersTableBody = document.getElementById('orders-table-body');
+            const searchInput = document.getElementById('search-input');
+            const statusFilterSelect = document.getElementById('status-filter');
+            const applyFiltersButton = document.getElementById('apply-filters-button');
+
+            // Modal elements
+            const statusModal = document.getElementById('status-modal');
+            const deleteModal = document.getElementById('delete-modal');
+            const detailsModal = document.getElementById('details-modal');
+            const assignRiderModal = document.getElementById('assign-rider-modal');
+
+            const modalOrderIdSpan = document.getElementById('modal-order-id');
+            const deleteOrderIdSpan = document.getElementById('delete-order-id');
+            const modalStatusSelect = document.getElementById('modal-status-select');
+            const updateStatusButton = document.getElementById('update-status-button');
+            const closeStatusModalButton = document.getElementById('close-status-modal');
+            const confirmDeleteButton = document.getElementById('confirm-delete-button');
+            const cancelDeleteButton = document.getElementById('cancel-delete-button');
+            const closeDetailsModalButton = document.getElementById('close-details-modal');
+            const assignRiderButton = document.getElementById('assign-rider-button');
+            const cancelAssignRiderButton = document.getElementById('cancel-assign-rider');
+
+            const detailsOrderIdSpan = document.getElementById('details-order-id');
+            const detailsOrderTypeSpan = document.getElementById('details-order-type');
+            const detailsOrderStatusSpan = document.getElementById('details-order-status');
+            const detailsOrderDescriptionP = document.getElementById('details-order-description');
+
+            const assignRiderOrderIdSpan = document.getElementById('assign-rider-order-id');
+            const riderSelect = document.getElementById('rider-select');
+
+            let currentOrders = [];
+            let currentOrderIdToUpdate = null;
+            let currentOrderIdToDelete = null;
+            let currentOrderToView = null;
+            let currentOrderToAssignRider = null;
+
+            // Helper function to show a modal
+            const showModal = (modal) => {
+                modal.classList.remove('hidden');
+            };
+
+            // Helper function to hide a modal
+            const hideModal = (modal) => {
+                modal.classList.add('hidden');
+            };
+
+            // Toggle mobile navigation menu
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Toggle sidebar visibility
+            if (sidebarToggleButton && sidebar && mainContent) {
+                sidebarToggleButton.addEventListener('click', () => {
+                    sidebar.classList.toggle('-translate-x-full');
+                    if (window.innerWidth >= 768) {
+                        mainContent.classList.toggle('md:ml-64');
+                    }
+                });
+            }
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // Function to generate the HTML for a single order row
+            const createOrderRowHtml = (order) => {
+                const customerName = MOCK_CUSTOMERS[order.id] || "Unknown Customer";
+
+                let statusColorClass = 'bg-gray-200 text-gray-800';
+                switch (order.order_status) {
+                    case 'pending':
+                        statusColorClass = 'bg-runam-yellow text-runam-charcoal';
+                        break;
+                    case 'approved':
+                        statusColorClass = 'bg-blue-100 text-blue-800';
+                        break;
+                    case 'in-transit':
+                        statusColorClass = 'bg-purple-100 text-purple-800';
+                        break;
+                    case 'completed':
+                        statusColorClass = 'bg-green-100 text-green-800';
+                        break;
+                    case 'cancelled':
+                        statusColorClass = 'bg-red-100 text-red-800';
+                        break;
+                }
+
+                return `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-runam-charcoal">#RUNAM${order.id.toString().padStart(3, '0')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${customerName}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorClass}">${order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order['created at']}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <button class="text-blue-500 hover:text-blue-700 transition-all details-button" title="View Details" data-order-id="${order.id}">
+                                <i data-lucide="eye" class="lucide"></i>
+                            </button>
+                            <button class="text-runam-green hover:text-runam-charcoal transition-all status-button" title="Update Status" data-order-id="${order.id}" data-current-status="${order.order_status}">
+                                <i data-lucide="refresh-cw" class="lucide"></i>
+                            </button>
+                            <button class="text-purple-500 hover:text-purple-700 transition-all assign-rider-button" title="Assign Rider" data-order-id="${order.id}">
+                                <i data-lucide="bike" class="lucide"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-700 transition-all delete-button" title="Delete Order" data-order-id="${order.id}">
+                                <i data-lucide="trash" class="lucide"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            };
+
+            // Function to render orders into the table
+            const renderOrders = (orders) => {
+                ordersTableBody.innerHTML = ''; // Clear previous content
+                if (orders.length === 0) {
+                    ordersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No orders found.</td>
+                        </tr>
+                    `;
+                } else {
+                    const html = orders.map(createOrderRowHtml).join('');
+                    ordersTableBody.innerHTML = html;
+                    lucide.createIcons(); // Re-initialize icons for the new rows
+                }
+            };
+
+            // Function to fetch orders from the API and render them
+            const fetchAndRenderOrders = async () => {
+                ordersTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Loading orders...</td>
+                    </tr>
+                `;
+                try {
+                    const response = await fetch(`${BASE_URL}orders.php`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        currentOrders = result.orders;
+                        renderOrders(currentOrders);
+                    } else {
+                        throw new Error(result.message || 'Failed to fetch orders.');
+                    }
+                } catch (error) {
+                    console.error('Error fetching orders:', error);
+                    ordersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-sm text-red-500">Error fetching orders. Please try again later.</td>
+                        </tr>
+                    `;
+                }
+            };
+
+            // Event listener for filter and search functionality
+            const applyFilters = () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedStatus = statusFilterSelect.value;
+                const filteredOrders = currentOrders.filter(order => {
+                    const customerName = MOCK_CUSTOMERS[order.id] || "";
+                    const matchesSearch = order.id.toString().includes(searchTerm) || customerName.toLowerCase().includes(searchTerm);
+                    const matchesStatus = selectedStatus === '' || order.order_status === selectedStatus;
+                    return matchesSearch && matchesStatus;
+                });
+                renderOrders(filteredOrders);
+            };
+
+            applyFiltersButton.addEventListener('click', applyFilters);
+            searchInput.addEventListener('keyup', applyFilters);
+            statusFilterSelect.addEventListener('change', applyFilters);
+
+            // Populate the rider select dropdown with mock data
+            const populateRiderSelect = () => {
+                riderSelect.innerHTML = '<option value="">Select a Rider</option>';
+                MOCK_RIDERS.forEach(rider => {
+                    const option = document.createElement('option');
+                    option.value = rider.id;
+                    option.textContent = rider.name;
+                    riderSelect.appendChild(option);
+                });
+            };
+            populateRiderSelect();
+
+            // Event listener for all action buttons using event delegation
+            ordersTableBody.addEventListener('click', async (event) => {
+                const button = event.target.closest('button');
+                if (!button) return;
+
+                const orderId = parseInt(button.dataset.orderId);
+                const order = currentOrders.find(o => o.id === orderId);
+
+                if (!order) {
+                    console.error('Order not found for ID:', orderId);
+                    return;
+                }
+
+                // Handle details button click
+                if (button.classList.contains('details-button')) {
+                    detailsOrderIdSpan.textContent = `#RUNAM${order.id.toString().padStart(3, '0')}`;
+                    detailsOrderTypeSpan.textContent = order.order_type;
+                    detailsOrderStatusSpan.textContent = order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1);
+                    detailsOrderDescriptionP.textContent = order.order_description;
+                    showModal(detailsModal);
+                }
+
+                // Handle status button click
+                if (button.classList.contains('status-button')) {
+                    const currentStatus = button.dataset.currentStatus;
+                    currentOrderIdToUpdate = orderId;
+                    modalOrderIdSpan.textContent = `#RUNAM${orderId.toString().padStart(3, '0')}`;
+                    modalStatusSelect.value = currentStatus;
+                    showModal(statusModal);
+                }
+
+                // Handle assign rider button click
+                if (button.classList.contains('assign-rider-button')) {
+                    currentOrderToAssignRider = order;
+                    assignRiderOrderIdSpan.textContent = `#RUNAM${orderId.toString().padStart(3, '0')}`;
+                    showModal(assignRiderModal);
+                }
+
+                // Handle delete button click
+                if (button.classList.contains('delete-button')) {
+                    currentOrderIdToDelete = orderId;
+                    deleteOrderIdSpan.textContent = `#RUNAM${orderId.toString().padStart(3, '0')}`;
+                    showModal(deleteModal);
+                }
+            });
+
+            // Handle status update modal logic
+            updateStatusButton.addEventListener('click', async () => {
+                if (!currentOrderIdToUpdate) return;
+                const newStatus = modalStatusSelect.value;
+                
+                try {
+                    const response = await fetch(`${BASE_URL}update-order-status.php`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            order_id: currentOrderIdToUpdate,
+                            status: newStatus
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        await fetchAndRenderOrders();
+                        hideModal(statusModal);
+                    } else {
+                        console.error('API Error:', result.message);
+                    }
+                } catch (error) {
+                    console.error('Error updating order status:', error);
+                }
+            });
+
+            // Handle delete confirmation modal logic
+            confirmDeleteButton.addEventListener('click', async () => {
+                if (!currentOrderIdToDelete) return;
+
+                try {
+                    const response = await fetch(`${BASE_URL}delete-order.php?id=${currentOrderIdToDelete}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        await fetchAndRenderOrders();
+                        hideModal(deleteModal);
+                    } else {
+                        console.error('API Error:', result.message);
+                    }
+                } catch (error) {
+                    console.error('Error deleting order:', error);
+                }
+            });
+
+            // Handle assign rider button click logic (simulated)
+            assignRiderButton.addEventListener('click', () => {
+                const riderId = riderSelect.value;
+                if (!riderId) {
+                    console.log("No rider selected.");
+                    return;
+                }
+                const riderName = MOCK_RIDERS.find(r => r.id == riderId).name;
+                console.log(`Simulating API call: Assigning order #${currentOrderToAssignRider.id} to rider ${riderName} (ID: ${riderId}).`);
+                // Here you would make a real API call to assign the rider.
+                
+                // For now, let's just update the status to 'in-transit' to simulate a successful assignment.
+                // In a real app, a new API call would be needed.
+                const newStatus = 'in-transit';
+
+                // Find the order in the currentOrders array and update its status
+                const orderToUpdate = currentOrders.find(o => o.id === currentOrderToAssignRider.id);
+                if (orderToUpdate) {
+                    orderToUpdate.order_status = newStatus;
+                    renderOrders(currentOrders);
+                }
+                hideModal(assignRiderModal);
+                
+                // A better approach would be to make a PUT request to the `update-order-status.php` API
+                // with the new status "in-transit"
+                // await updateOrderStatus(currentOrderToAssignRider.id, 'in-transit');
+                // The updateOrderStatus logic is already there in the other button click handler.
+            });
+
+            // Close modals with the cancel buttons
+            closeStatusModalButton.addEventListener('click', () => hideModal(statusModal));
+            cancelDeleteButton.addEventListener('click', () => hideModal(deleteModal));
+            closeDetailsModalButton.addEventListener('click', () => hideModal(detailsModal));
+            cancelAssignRiderButton.addEventListener('click', () => hideModal(assignRiderModal));
+
+            // Initial fetch of orders when the page loads
+            fetchAndRenderOrders();
+        });
+    </script>
 </body>
 </html>
