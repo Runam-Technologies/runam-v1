@@ -116,7 +116,7 @@
             <h1 class="text-3xl sm:text-4xl font-bold text-center text-runam-charcoal mb-8">Register for Runam</h1>
             <p class="text-center text-runam-charcoal opacity-80 mb-8">Create your account to start enjoying seamless deliveries!</p>
 
-            <form action="#" method="POST" class="space-y-6">
+            <form action="#" method="POST" class="space-y-6" id="signup-form">
                 <div>
                     <label for="full-name" class="block text-sm font-medium text-runam-charcoal mb-2">
                         <i data-lucide="user" class="lucide inline-block align-middle mr-2"></i> Full Name
@@ -150,7 +150,7 @@
                         placeholder="Re-enter your password">
                 </div>
 
-                <button type="submit" id="login-button"
+                <button type="submit" id="signup-button"
                     class="w-full bg-[var(--color-runam-green)] text-white font-semibold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-runam-green)] focus:ring-opacity-75">
 
                     Register Account
@@ -186,6 +186,116 @@
             </div>
         </div>
     </footer>
+
+    <!-- Modals Container -->
+    <div id="modals-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Define the base URL for the API
+            const BASE_URL = 'https://runam-backend.onrender.com';
+
+            // Get form elements
+            const signupForm = document.getElementById('signup-form');
+            const signupButton = document.getElementById('signup-button');
+            const modalsContainer = document.getElementById('modals-container');
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // Renders a modal for success or error messages
+            const renderModal = (type, title, message) => {
+                modalsContainer.innerHTML = `
+                    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay opacity-0">
+                        <div class="p-8 rounded-xl shadow-2xl w-full max-w-sm modal-content opacity-0
+                                    ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold">${title}</h3>
+                                <button class="text-2xl font-bold close-modal-btn">&times;</button>
+                            </div>
+                            <p>${message}</p>
+                        </div>
+                    </div>
+                `;
+                const overlay = modalsContainer.querySelector('.modal-overlay');
+                const content = modalsContainer.querySelector('.modal-content');
+                setTimeout(() => {
+                    overlay.classList.add('opacity-100');
+                    content.classList.add('show');
+                }, 10);
+                const closeModal = () => {
+                    overlay.classList.remove('opacity-100');
+                    content.classList.remove('show');
+                    setTimeout(() => modalsContainer.innerHTML = '', 300);
+                };
+                modalsContainer.querySelector('.close-modal-btn').addEventListener('click', closeModal);
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) closeModal();
+                });
+            };
+
+            // Handles the form submission
+            signupForm.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent the default form submission behavior
+
+                // Get form data
+                // const email = emailInput.value;
+                // const password = passwordInput.value;
+
+                // Disable the button and show a loading state
+                signupButton.disabled = true;
+                signupButton.textContent = 'Signing up...';
+
+                renderModal('success', 'Sign Up Successful', 'Redirecting to Login Page.');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 1000);
+
+                // try {
+                //     // Make the API call to the login endpoint
+                //     const response = await fetch(`${BASE_URL}/auth/login.php`, {
+                //         method: 'POST',
+                //         headers: {
+                //             'Content-Type': 'application/json',
+                //         },
+                //         body: JSON.stringify({ email, password }),
+                //     });
+                    
+                //     const result = await response.json();
+                //     console.log(result);
+
+                //     if (result.status === 'success') {
+                //         // On success, show a success message and redirect
+                //         renderModal('success', 'Login Successful', 'Redirecting to your dashboard.');
+                //         setTimeout(() => {
+                //             window.location.href = 'user-dashboard.html';
+                //         }, 1000);
+                //     } else {
+                //         // On failure, show an error message
+                //         console.log(result);
+                //         renderModal('error', 'Login Failed', result.message || 'Invalid email or password.');
+                //     }
+                // } catch (error) {
+                //     console.error('Error during login:', error);
+                //     renderModal('error', 'Network Error', 'Could not connect to the server. Please check your network.');
+                // } finally {
+                //     // Re-enable the button
+                //     loginButton.disabled = false;
+                //     loginButton.textContent = 'Login';
+                // }
+            });
+
+            // JavaScript for mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>

@@ -222,7 +222,7 @@
                 let recentDeliveriesHtml = recentDeliveries.length > 0 ? recentDeliveries.map(createOrderCardHtml).join('') : '<p class="text-center text-gray-500 text-sm mt-4">You have no recent deliveries.</p>';
 
                 mainContentArea.innerHTML = `
-                    <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Welcome, User!</h1>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Welcome, Emma!</h1>
                     <div class="mb-10 text-center">
                         <button onclick="renderPage('create-order')" class="bg-runam-green text-white font-bold py-4 px-8 rounded-xl text-lg
                                         hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl
@@ -260,25 +260,43 @@
                 mainContentArea.innerHTML = `
                     <h1 class="text-3xl sm:text-4xl font-bold text-runam-charcoal mb-8">Create New Order</h1>
                     <div class="bg-white p-6 rounded-xl shadow-md max-w-2xl mx-auto">
-                        <form id="create-order-form" class="space-y-6">
-                            <div>
-                                <label for="order-type" class="block text-sm font-medium text-gray-700">Order Type</label>
-                                <select id="order-type" name="order_type" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-runam-green focus:border-runam-green sm:text-sm">
-                                    <option value="" disabled selected>Select an order type</option>
-                                    ${orderOptions}
-                                </select>
-                            </div>
-                            <div>
-                                <label for="order-description" class="block text-sm font-medium text-gray-700">Order Description</label>
-                                <textarea id="order-description" name="order_description" rows="5" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-runam-green focus:border-runam-green sm:text-sm resize-none" placeholder="Provide a detailed description of your project..."></textarea>
-                            </div>
-                            <div id="status-message" class="text-center font-medium"></div>
-                            <div>
-                                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-runam-green hover:bg-opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-runam-green">
-                                    Place Order
-                                </button>
-                            </div>
-                        </form>
+                         <form action="#" method="POST" class="space-y-6">
+                <div>
+                    <label for="pickup-location" class="block text-sm font-medium text-runam-charcoal mb-2">
+                        <i data-lucide="map-pin" class="lucide inline-block align-middle mr-2 text-runam-green"></i> Pickup Location
+                    </label>
+                    <input type="text" id="pickup-location" name="pickup-location" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all"
+                        placeholder="e.g., Block A, Room 101">
+                </div>
+                <div>
+                    <label for="dropoff-location" class="block text-sm font-medium text-runam-charcoal mb-2">
+                        <i data-lucide="map" class="lucide inline-block align-middle mr-2 text-runam-green"></i> Drop-off Location
+                    </label>
+                    <input type="text" id="dropoff-location" name="dropoff-location" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all"
+                        placeholder="e.g., Library Main Entrance">
+                </div>
+                <div>
+                    <label for="description" class="block text-sm font-medium text-runam-charcoal mb-2">
+                        <i data-lucide="clipboard-list" class="lucide inline-block align-middle mr-2 text-runam-green"></i> Item Description
+                    </label>
+                    <textarea id="description" name="description" rows="4" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all"
+                        placeholder="e.g., A textbook and a coffee from the cafe..."></textarea>
+                </div>
+                <div>
+                    <label for="delivery-time" class="block text-sm font-medium text-runam-charcoal mb-2">
+                        <i data-lucide="clock" class="lucide inline-block align-middle mr-2 text-runam-green"></i> Preferred Delivery Time
+                    </label>
+                    <input type="datetime-local" id="delivery-time" name="delivery-time"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-runam-green focus:border-transparent transition-all">
+                </div>
+                <button type="submit"
+                    class="w-full bg-runam-green text-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-runam-green focus:ring-opacity-75">
+                    Submit Order
+                </button>
+            </form>
                     </div>
                 `;
                 

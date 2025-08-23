@@ -224,38 +224,43 @@
                 loginButton.disabled = true;
                 loginButton.textContent = 'Logging in...';
 
-                try {
-                    // Make the API call to the login endpoint
-                    const response = await fetch(`${BASE_URL}/auth/login.php`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ email, password }),
-                    });
-                    
-                    const result = await response.json();
-                    console.log(result);
-
-                    if (result.status === 'success') {
-                        // On success, show a success message and redirect
-                        renderModal('success', 'Login Successful', 'Redirecting to your dashboard.');
+                renderModal('success', 'Login Successful', 'Redirecting to your dashboard.');
                         setTimeout(() => {
                             window.location.href = 'user-dashboard.html';
                         }, 1000);
-                    } else {
-                        // On failure, show an error message
-                        console.log(result);
-                        renderModal('error', 'Login Failed', result.message || 'Invalid email or password.');
-                    }
-                } catch (error) {
-                    console.error('Error during login:', error);
-                    renderModal('error', 'Network Error', 'Could not connect to the server. Please check your network.');
-                } finally {
-                    // Re-enable the button
-                    loginButton.disabled = false;
-                    loginButton.textContent = 'Login';
-                }
+
+                // try {
+                //     // Make the API call to the login endpoint
+                //     const response = await fetch(`${BASE_URL}/auth/login.php`, {
+                //         method: 'POST',
+                //         headers: {
+                //             'Content-Type': 'application/json',
+                //         },
+                //         body: JSON.stringify({ email, password }),
+                //     });
+                    
+                //     const result = await response.json();
+                //     console.log(result);
+
+                //     if (result.status === 'success') {
+                //         // On success, show a success message and redirect
+                //         renderModal('success', 'Login Successful', 'Redirecting to your dashboard.');
+                //         setTimeout(() => {
+                //             window.location.href = 'user-dashboard.html';
+                //         }, 1000);
+                //     } else {
+                //         // On failure, show an error message
+                //         console.log(result);
+                //         renderModal('error', 'Login Failed', result.message || 'Invalid email or password.');
+                //     }
+                // } catch (error) {
+                //     console.error('Error during login:', error);
+                //     renderModal('error', 'Network Error', 'Could not connect to the server. Please check your network.');
+                // } finally {
+                //     // Re-enable the button
+                //     loginButton.disabled = false;
+                //     loginButton.textContent = 'Login';
+                // }
             });
 
             // JavaScript for mobile menu toggle
